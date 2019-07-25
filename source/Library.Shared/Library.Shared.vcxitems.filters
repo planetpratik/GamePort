@@ -1,0 +1,143 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)DeviceResources.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)DrawableGameComponent.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)GameComponent.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Transform2D.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Utility.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Camera.cpp">
+      <Filter>Cameras</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)OrthographicCamera.cpp">
+      <Filter>Cameras</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)KeyboardComponent.cpp">
+      <Filter>Input</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)MouseComponent.cpp">
+      <Filter>Input</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)ColorHelper.cpp">
+      <Filter>Helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)VectorHelper.cpp">
+      <Filter>Helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)MatrixHelper.cpp">
+      <Filter>Helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)GamePadComponent.cpp">
+      <Filter>Input</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)imgui_impl_dx11.cpp">
+      <Filter>ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)ImGuiComponent.cpp">
+      <Filter>ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)imgui\imgui.cpp">
+      <Filter>ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)imgui\imgui_demo.cpp">
+      <Filter>ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)imgui\imgui_draw.cpp">
+      <Filter>ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)imgui\imgui_widgets.cpp">
+      <Filter>ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)imgui_impl_uwp.cpp">
+      <Filter>ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)FpsComponent.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)DeviceResources.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)DrawableGameComponent.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)GameComponent.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)StepTimer.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Transform2D.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Utility.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)VertexDeclarations.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Camera.h">
+      <Filter>Cameras</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)OrthographicCamera.h">
+      <Filter>Cameras</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)KeyboardComponent.h">
+      <Filter>Input</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)MouseComponent.h">
+      <Filter>Input</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)ColorHelper.h">
+      <Filter>Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)DirectXHelper.h">
+      <Filter>Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)VectorHelper.h">
+      <Filter>Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)MatrixHelper.h">
+      <Filter>Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)GamePadComponent.h">
+      <Filter>Input</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)imgui_impl_dx11.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)ImGuiComponent.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)imgui\imstb_truetype.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)imgui\imconfig.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)imgui\imgui.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)imgui\imgui_internal.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)imgui\imstb_rectpack.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)imgui\imstb_textedit.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)imgui_impl_uwp.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)FpsComponent.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)Transform2D.inl" />
+    <None Include="$(MSBuildThisFileDirectory)Camera.inl">
+      <Filter>Cameras</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)OrthographicCamera.inl">
+      <Filter>Cameras</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Cameras">
+      <UniqueIdentifier>{1f6b1221-57b8-484d-bde1-464ec402f454}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Input">
+      <UniqueIdentifier>{40885991-438a-4680-bb2d-3f0089948532}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Helpers">
+      <UniqueIdentifier>{c1a4f9c2-11c3-4910-bfd0-b85a75c40b59}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ImGui">
+      <UniqueIdentifier>{7f77d4c5-f50d-4607-a062-aafecbd4e70c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <ItemsProjectGuid>{b86a3404-f58b-40e3-9c1f-4728d8a32ead}</ItemsProjectGuid>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(MSBuildThisFileDirectory)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectCapability Include="SourceItemsFromImports" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Ball.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)BallManager.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Field.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)FieldManager.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)MoodySprite.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)SpriteDemoManager.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Ball.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)BallManager.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Field.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)FieldManager.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)MoodySprite.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)SpriteDemoManager.h" />
+  </ItemGroup>
+</Project>
