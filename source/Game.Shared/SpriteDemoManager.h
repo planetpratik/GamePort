@@ -75,7 +75,7 @@ namespace DirectXGame
 		// Balloon Fight Related Variables
 
 	public:
-		inline static const DirectX::XMFLOAT2 BackgroundImageScale{ DirectX::XMFLOAT2(35.0f, 35.0f) };
+		inline static const DirectX::XMFLOAT2 BackgroundImageScale{ DirectX::XMFLOAT2(50.0f, 50.0f) };
 		inline static const int MAIN_MENU_BACKGROUND_IMAGE_INDEX = 0;
 	private:
 		winrt::com_ptr<ID3D11ShaderResourceView> mSpriteSheetMainMenu;

@@ -77,7 +77,7 @@ namespace DirectXGame
 
 		auto helpTextImGuiRenderBlock = make_shared<ImGuiComponent::RenderBlock>([this]()
 			{
-				ImGui::Begin("UWP Rendering Demo");
+				ImGui::Begin("Balloon Fight");
 				ImGui::SetNextWindowPos(ImVec2(10, 10));
 
 				{
@@ -222,8 +222,8 @@ namespace DirectXGame
 	void Game::GetDefaultSize(int& width, int& height) const
 	{
 		// TODO: Change to desired default window size (note minimum size is 320x200).
-		width = 800;
-		height = 600;
+		width = 1024;
+		height = 768;
 	}
 #pragma endregion
 
