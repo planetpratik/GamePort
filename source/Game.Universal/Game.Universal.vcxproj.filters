@@ -43,7 +43,7 @@
     <Image Include="Assets\WideLogo.scale-200.png">
       <Filter>Assets</Filter>
     </Image>
-    <Image Include="Content\Textures\snoods_default.png">
+    <Image Include="Content\Textures\StartScreen.png">
       <Filter>Content\Textures</Filter>
     </Image>
   </ItemGroup>
@@ -53,9 +53,6 @@
   <ItemGroup>
     <None Include="Game.Universal_TemporaryKey.pfx" />
     <None Include="packages.config" />
-    <None Include="Content\Fonts\Arial_14_Regular.spritefont">
-      <Filter>Content\Fonts</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Content\Shaders\SpriteRendererVS.hlsl">
@@ -70,5 +67,11 @@
     <FxCompile Include="Content\Shaders\SpriteRendererPS.hlsl">
       <Filter>Content\Shaders</Filter>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="Content\Fonts\Arial_14_Regular.spritefont" />
+    <CopyFileToFolders Include="Content\Textures\snoods_default.png">
+      <Filter>Assets</Filter>
+    </CopyFileToFolders>
   </ItemGroup>
 </Project>

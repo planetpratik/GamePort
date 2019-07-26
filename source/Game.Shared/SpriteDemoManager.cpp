@@ -58,11 +58,15 @@ namespace DirectXGame
 		mAlphaBlending = nullptr;
 		ThrowIfFailed(mDeviceResources->GetD3DDevice()->CreateBlendState(&blendStateDesc, mAlphaBlending.put()));
 		
-		mSpriteSheet = nullptr;
+		/*mSpriteSheet = nullptr;
 		ThrowIfFailed(DirectX::CreateWICTextureFromFile(mDeviceResources->GetD3DDevice(), L"Content\\Textures\\snoods_default.png", nullptr, mSpriteSheet.put()));
 		InitializeVertices();
 		InitializeSprites();
-		mSpriteCountDistribution = uniform_int_distribution<uint32_t>(0U, static_cast<uint32_t>(mSprites.size()) - 1);
+		mSpriteCountDistribution = uniform_int_distribution<uint32_t>(0U, static_cast<uint32_t>(mSprites.size()) - 1);*/
+
+		mSpriteSheetMainMenu = nullptr;
+		ThrowIfFailed(DirectX::CreateWICTextureFromFile(mDeviceResources->GetD3DDevice(), L"Content\\Textures\\StartScreen.png", nullptr, mSpriteSheetMainMenu.put()));
+		InitializeVertices();
 	}
 
 	void SpriteDemoManager::ReleaseDeviceDependentResources()
@@ -75,22 +79,25 @@ namespace DirectXGame
 		mVSCBufferPerObject = nullptr;
 		mSpriteSheet = nullptr;
 		mTextureSampler = nullptr;
+
+		mSpriteSheetMainMenu = nullptr;
 	}
 
-	void SpriteDemoManager::Update(const StepTimer& timer)
+	void SpriteDemoManager::Update(const StepTimer& /*timer*/)
 	{		
-		if (timer.GetTotalSeconds() > mLastMoodUpdateTime + MoodUpdateDelay)
-		{
-			mLastMoodUpdateTime = timer.GetTotalSeconds();
+		//if (timer.GetTotalSeconds() > mLastMoodUpdateTime + MoodUpdateDelay)
+		//{
+		//	mLastMoodUpdateTime = timer.GetTotalSeconds();
 
-			uint32_t spritesToChange = mSpriteCountDistribution(mRandomGenerator);
-			for (uint32_t i = 0; i < spritesToChange; ++i)
-			{
-				uint32_t spriteIndex = mSpriteCountDistribution(mRandomGenerator);
-				auto sprite = mSprites[spriteIndex];
-				ChangeMood(*sprite);
-			}
-		}
+		//	uint32_t spritesToChange = mSpriteCountDistribution(mRandomGenerator);
+		//	for (uint32_t i = 0; i < spritesToChange; ++i)
+		//	{
+		//		uint32_t spriteIndex = mSpriteCountDistribution(mRandomGenerator);
+		//		spriteIndex;
+		//		//auto sprite = mSprites[spriteIndex];
+		//		//ChangeMood(*sprite);
+		//	}
+		//}
 	}
 
 	void SpriteDemoManager::Render(const StepTimer& /* timer */)
@@ -107,8 +114,18 @@ namespace DirectXGame
 
 		direct3DDeviceContext->VSSetShader(mVertexShader.get(), nullptr, 0);
 		direct3DDeviceContext->PSSetShader(mPixelShader.get(), nullptr, 0);
+		
+		winrt::impl::abi_t<ID3D11ShaderResourceView>* psShaderResources = nullptr;
 
-		const auto psShaderResources = mSpriteSheet.get();
+		if (!mIsGameStarted)
+		{
+			psShaderResources = mSpriteSheetMainMenu.get();
+		}
+		else
+		{
+			// Use different Sprite Sheets When game starts.
+		}
+		//const auto psShaderResources = mSpriteSheet.get();
 		direct3DDeviceContext->PSSetShaderResources(0, 1, &psShaderResources);
 
 		const auto vsConstantBuffers = mVSCBufferPerObject.get();
@@ -118,10 +135,12 @@ namespace DirectXGame
 		direct3DDeviceContext->PSSetSamplers(0, 1, &textureSamplers);
 		direct3DDeviceContext->OMSetBlendState(mAlphaBlending.get(), 0, 0xFFFFFFFF);
 
-		for (const auto& sprite : mSprites)
+		DrawSprite(MAIN_MENU_BACKGROUND_IMAGE_INDEX);
+
+		/*for (const auto& sprite : mSprites)
 		{
 			DrawSprite(*sprite);
-		}
+		}*/
 	}
 
 	void SpriteDemoManager::DrawSprite(MoodySprite& sprite)
@@ -132,6 +151,20 @@ namespace DirectXGame
 		XMStoreFloat4x4(&mVSCBufferPerObjectData.WorldViewProjection, wvp);
 		XMMATRIX textureTransform = XMLoadFloat4x4(&sprite.TextureTransform());
 		XMStoreFloat4x4(&mVSCBufferPerObjectData.TextureTransform, XMMatrixTranspose(textureTransform));		 
+		direct3DDeviceContext->UpdateSubresource(mVSCBufferPerObject.get(), 0, nullptr, &mVSCBufferPerObjectData, 0, 0);
+
+		direct3DDeviceContext->DrawIndexed(mIndexCount, 0, 0);
+	}
+
+	void SpriteDemoManager::DrawSprite(int/*winrt::com_ptr<ID3D11Texture2D>*/ /*backgroundImageSprite*/)
+	{
+		ID3D11DeviceContext* direct3DDeviceContext = mDeviceResources->GetD3DDeviceContext();
+		XMFLOAT2 position(mPosition.x, mPosition.y);
+		Transform2D transform(position, 0.0f, BackgroundImageScale);
+		const XMMATRIX wvp = XMMatrixTranspose(transform.WorldMatrix() * mCamera->ViewProjectionMatrix());
+		XMStoreFloat4x4(&mVSCBufferPerObjectData.WorldViewProjection, wvp);
+		XMMATRIX textureTransform = XMLoadFloat4x4(&DX::MatrixHelper::Identity);
+		XMStoreFloat4x4(&mVSCBufferPerObjectData.TextureTransform, XMMatrixTranspose(textureTransform));
 		direct3DDeviceContext->UpdateSubresource(mVSCBufferPerObject.get(), 0, nullptr, &mVSCBufferPerObjectData, 0, 0);
 
 		direct3DDeviceContext->DrawIndexed(mIndexCount, 0, 0);

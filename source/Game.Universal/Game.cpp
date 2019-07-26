@@ -51,16 +51,17 @@ namespace DirectXGame
 		mGamePad = make_shared<GamePadComponent>(mDeviceResources);
 		mComponents.push_back(mGamePad);
 
-		auto fieldManager = make_shared<FieldManager>(mDeviceResources, camera);
-		mComponents.push_back(fieldManager);
+		//auto fieldManager = make_shared<FieldManager>(mDeviceResources, camera);
+		//mComponents.push_back(fieldManager);
 
-		auto ballManager = make_shared<BallManager>(mDeviceResources, camera);		
-		mComponents.push_back(ballManager);
+		//auto ballManager = make_shared<BallManager>(mDeviceResources, camera);		
+		//mComponents.push_back(ballManager);
 
 		const int32_t spriteRowCount = 13;
 		const int32_t spriteColumnCount = 15;
 		auto spriteDemoManager = make_shared<SpriteDemoManager>(mDeviceResources, camera, spriteRowCount, spriteColumnCount);
-		const XMFLOAT2 center((-spriteColumnCount + 1) * SpriteDemoManager::SpriteScale.x, (-spriteRowCount + 1) * SpriteDemoManager::SpriteScale.y);
+		//const XMFLOAT2 center((-spriteColumnCount + 1) * SpriteDemoManager::SpriteScale.x, (-spriteRowCount + 1) * SpriteDemoManager::SpriteScale.y);
+		const XMFLOAT2 center(0.0f, 0.0f);
 		spriteDemoManager->SetPositon(center);
 		mComponents.push_back(spriteDemoManager);
 
@@ -91,7 +92,7 @@ namespace DirectXGame
 		imGui->AddRenderBlock(helpTextImGuiRenderBlock);
 
 		InitializeResources();
-		ballManager->SetActiveField(fieldManager->ActiveField());
+		//ballManager->SetActiveField(fieldManager->ActiveField());
 	}
 
 	void Game::Tick()

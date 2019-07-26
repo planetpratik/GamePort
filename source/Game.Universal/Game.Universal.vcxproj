@@ -138,6 +138,7 @@
       <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)Content\Textures\</DestinationFolders>
       <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)Content\Textures\</DestinationFolders>
     </CopyFileToFolders>
+    <Image Include="Content\Textures\StartScreen.png" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Library.Universal\Library.Universal.vcxproj">
