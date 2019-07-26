@@ -222,8 +222,8 @@ namespace DirectXGame
 	void Game::GetDefaultSize(int& width, int& height) const
 	{
 		// TODO: Change to desired default window size (note minimum size is 320x200).
-		width = 1024;
-		height = 768;
+		width = 1200;
+		height = 800;
 	}
 #pragma endregion
 

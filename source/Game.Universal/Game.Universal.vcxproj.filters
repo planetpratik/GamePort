@@ -46,6 +46,12 @@
     <Image Include="Content\Textures\StartScreen.png">
       <Filter>Content\Textures</Filter>
     </Image>
+    <Image Include="Content\Textures\AllSprites.png">
+      <Filter>Content\Textures</Filter>
+    </Image>
+    <Image Include="Content\Textures\StartScreenBalloons.png">
+      <Filter>Content\Textures</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest" />

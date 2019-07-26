@@ -19,6 +19,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)Field.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)FieldManager.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)MoodySprite.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Sprite.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)SpriteDemoManager.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -27,6 +28,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)Field.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)FieldManager.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)MoodySprite.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Sprite.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)SpriteDemoManager.h" />
   </ItemGroup>
 </Project>

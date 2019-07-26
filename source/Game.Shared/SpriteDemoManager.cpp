@@ -64,8 +64,11 @@ namespace DirectXGame
 		InitializeSprites();
 		mSpriteCountDistribution = uniform_int_distribution<uint32_t>(0U, static_cast<uint32_t>(mSprites.size()) - 1);*/
 
+		// Load Start Menu Screen in SRV
 		mSpriteSheetMainMenu = nullptr;
 		ThrowIfFailed(DirectX::CreateWICTextureFromFile(mDeviceResources->GetD3DDevice(), L"Content\\Textures\\StartScreen.png", nullptr, mSpriteSheetMainMenu.put()));
+
+		// Load Start Menu
 		InitializeVertices();
 	}
 
