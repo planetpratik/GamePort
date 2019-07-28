@@ -10,10 +10,13 @@ namespace DX
 	class KeyboardComponent;
 	class GamePadComponent;
 	class FpsComponent;
+	class OrthographicCamera;
 }
 
 namespace DirectXGame
 {
+	class SpriteDemoManager;
+
 	class Game : public DX::IDeviceNotify
 	{
 	public:
@@ -46,6 +49,7 @@ namespace DirectXGame
 		void Clear();
 		void CreateWindowSizeDependentResources();
 		void InitializeResources();
+		void InitializeGameObjects();
 
 		std::shared_ptr<DX::DeviceResources> mDeviceResources;
 		DX::StepTimer mTimer;
@@ -54,5 +58,16 @@ namespace DirectXGame
 		std::shared_ptr<DX::MouseComponent> mMouse;
 		std::shared_ptr<DX::GamePadComponent> mGamePad;
 		std::shared_ptr<DX::FpsComponent> mFpsComponent;
+		std::shared_ptr<DX::OrthographicCamera> mCamera;
+
+		std::shared_ptr<SpriteDemoManager> mMainMenuScreen;
+		std::shared_ptr<SpriteDemoManager> mMainMenuBalloons;
+		std::shared_ptr<SpriteDemoManager> mLevelScreen;
+		std::shared_ptr<SpriteDemoManager> mPlayerOne;
+		std::shared_ptr<SpriteDemoManager> mPlayerTwo;
+		std::shared_ptr<SpriteDemoManager> mEnemyOne;
+		std::shared_ptr<SpriteDemoManager> mEnemyTwo;
+		std::shared_ptr<SpriteDemoManager> mEnemyThree;
+
 	};
 }

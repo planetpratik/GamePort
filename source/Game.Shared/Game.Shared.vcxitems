@@ -21,6 +21,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)MoodySprite.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)Sprite.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)SpriteDemoManager.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)StateManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)Ball.h" />
@@ -30,5 +31,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)MoodySprite.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Sprite.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)SpriteDemoManager.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)StateManager.h" />
   </ItemGroup>
 </Project>

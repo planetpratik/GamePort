@@ -10,9 +10,12 @@ namespace DirectXGame
 		enum class SpriteTypeEnum
 		{
 			UNDEFINED,
-			MENU_BALLOONS,
+			MAIN_MENU_SCREEN,
+			MAIN_MENU_BALLOONS,
+			LEVEL_SCREEN,
 			PLAYER_ONE,
 			PLAYER_TWO,
+			ENEMY,
 			ENEMY_FLYING,
 			ENEMY_FALLING,
 			ENEMY_PUMPING

@@ -11,6 +11,7 @@
 #include "FieldManager.h"
 #include "BallManager.h"
 #include "SpriteDemoManager.h"
+#include "StateManager.h"
 
 extern void ExitGame();
 
@@ -36,9 +37,9 @@ namespace DirectXGame
 		mDeviceResources->CreateWindowSizeDependentResources();
 		CreateWindowSizeDependentResources();
 
-		auto camera = make_shared<OrthographicCamera>(mDeviceResources);
-		mComponents.push_back(camera);
-		camera->SetPosition(0, 0, 1);
+		mCamera = make_shared<OrthographicCamera>(mDeviceResources);
+		mComponents.push_back(mCamera);
+		mCamera->SetPosition(0, 0, 1);
 
 		mKeyboard = make_shared<KeyboardComponent>(mDeviceResources);
 		mKeyboard->Keyboard()->SetWindow(reinterpret_cast<ABI::Windows::UI::Core::ICoreWindow*>(window));
@@ -51,19 +52,13 @@ namespace DirectXGame
 		mGamePad = make_shared<GamePadComponent>(mDeviceResources);
 		mComponents.push_back(mGamePad);
 
-		//auto fieldManager = make_shared<FieldManager>(mDeviceResources, camera);
-		//mComponents.push_back(fieldManager);
+		auto stateInstance = StateManager::CreateInstance();
+		stateInstance->setState(StateManager::GameState::MAIN_MENU);
+		InitializeGameObjects();
 
-		//auto ballManager = make_shared<BallManager>(mDeviceResources, camera);		
-		//mComponents.push_back(ballManager);
-
-		const int32_t spriteRowCount = 13;
-		const int32_t spriteColumnCount = 15;
-		auto spriteDemoManager = make_shared<SpriteDemoManager>(mDeviceResources, camera, spriteRowCount, spriteColumnCount);
-		//const XMFLOAT2 center((-spriteColumnCount + 1) * SpriteDemoManager::SpriteScale.x, (-spriteRowCount + 1) * SpriteDemoManager::SpriteScale.y);
-		const XMFLOAT2 center(0.0f, 0.0f);
-		spriteDemoManager->SetPositon(center);
-		mComponents.push_back(spriteDemoManager);
+		mFpsComponent = make_shared<FpsComponent>(mDeviceResources);
+		mFpsComponent->SetVisible(false);
+		mComponents.push_back(mFpsComponent);
 
 		mTimer.SetFixedTimeStep(true);
 		mTimer.SetTargetElapsedSeconds(1.0 / 60);
@@ -92,7 +87,6 @@ namespace DirectXGame
 		imGui->AddRenderBlock(helpTextImGuiRenderBlock);
 
 		InitializeResources();
-		//ballManager->SetActiveField(fieldManager->ActiveField());
 	}
 
 	void Game::Tick()
@@ -108,6 +102,24 @@ namespace DirectXGame
 	void Game::Update(StepTimer const& timer)
 	{
 		PIXBeginEvent(PIX_COLOR_DEFAULT, L"Update");
+
+		// Check game state
+		auto instance = StateManager::GetInstance();
+		auto state = instance->getState();
+		auto activePlayers = instance->getActivePlayers();
+		if (state == StateManager::GameState::MAIN_MENU)
+		{
+			if (activePlayers == StateManager::ActivePlayers::PLAYER_ONE)
+			{
+				// If Key not pressed, keep updating current sprite animation
+				mMainMenuBalloons->UpdateData(timer, StateManager::ActivePlayers::PLAYER_ONE);
+
+			}
+			if (activePlayers == StateManager::ActivePlayers::PLAYER_ONE_AND_TWO)
+			{
+				mMainMenuBalloons->UpdateData(timer, StateManager::ActivePlayers::PLAYER_ONE_AND_TWO);
+			}
+		}
 
 		for (auto& component : mComponents)
 		{
@@ -258,6 +270,16 @@ namespace DirectXGame
 		}
 
 		CreateWindowSizeDependentResources();
+	}
+
+	void Game::InitializeGameObjects()
+	{
+		mMainMenuBalloons = make_shared<SpriteDemoManager>(mDeviceResources, mCamera, Sprite::SpriteTypeEnum::MAIN_MENU_BALLOONS);
+		mComponents.push_back(mMainMenuBalloons);
+		mMainMenuScreen = make_shared<SpriteDemoManager>(mDeviceResources, mCamera, Sprite::SpriteTypeEnum::MAIN_MENU_SCREEN);
+		mComponents.push_back(mMainMenuScreen);
+		auto instance = StateManager::GetInstance();
+		instance->setActivePlayers(StateManager::ActivePlayers::PLAYER_ONE);
 	}
 #pragma endregion
 }

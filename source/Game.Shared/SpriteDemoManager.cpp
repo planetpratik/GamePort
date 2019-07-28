@@ -12,13 +12,26 @@ using namespace DX;
 
 namespace DirectXGame
 {
-	SpriteDemoManager::SpriteDemoManager(const shared_ptr<DX::DeviceResources>& deviceResources, const shared_ptr<Camera>& camera, uint32_t spriteRowCount, uint32_t spriteColumCount) :
-		DrawableGameComponent(deviceResources, camera),
-		mSpriteRowCount(spriteRowCount), mSpriteColumnCount(spriteColumCount),
-		mRandomGenerator(mRandomDevice()),
-		mSpriteDistribution(0, SpriteCount - 1),
-		mMoodDistribution(static_cast<uint32_t>(MoodySprite::Moods::Neutral), static_cast<uint32_t>(MoodySprite::Moods::Angry))
+	const std::unordered_map<Sprite::SpriteTypeEnum, SpriteDemoManager::RowColumnLookupInfo> SpriteDemoManager::mSpriteRowColumnLookupValuesByType =
 	{
+		{ Sprite::SpriteTypeEnum::MAIN_MENU_SCREEN, {1u, 1u, {0.0, 0.0}, {50, 50}, {1.0f, 1.0f}, L"Content\\Textures\\StartScreen.png"}},
+		{ Sprite::SpriteTypeEnum::MAIN_MENU_BALLOONS, {1u, 4u, {-20.0f, -10.0f}, {2, 4}, {1.0f/4, 1.0f}, L"Content\\Textures\\StartScreenBalloons.png"}},
+		{ Sprite::SpriteTypeEnum::LEVEL_SCREEN, {1u, 1u, {0.0, 0.0}, {50, 50}, {1.0f, 1.0f}, L"Content\\Textures\\StartScreenBalloons.png"}},
+	};
+
+	const std::unordered_map<SpriteDemoManager::SpriteInitialPositions, DirectX::XMFLOAT2> SpriteDemoManager::mSpriteInitialPositionsLookup =
+	{
+		{ SpriteDemoManager::SpriteInitialPositions::MENU_PLAYER_ONE_BALLOON, DirectX::XMFLOAT2(-20.0f, -10.0f)},
+		{ SpriteDemoManager::SpriteInitialPositions::MENU_PLAYER_TWO_BALLOON, DirectX::XMFLOAT2(0.0f, 0.0f)},
+	};
+
+	SpriteDemoManager::SpriteDemoManager(const shared_ptr<DX::DeviceResources>& deviceResources, const shared_ptr<Camera>& camera, Sprite::SpriteTypeEnum type) :
+		DrawableGameComponent(deviceResources, camera), mType(type), mCurrentSpriteIndex(0), mSpriteInitialPositions(SpriteInitialPositions::UNDEFINED)
+	{
+		SpriteScale = mSpriteRowColumnLookupValuesByType.at(type).SpriteScale;
+		UVScalingFactor = mSpriteRowColumnLookupValuesByType.at(type).UVScalingFactor;
+		mPosition = mSpriteRowColumnLookupValuesByType.at(type).Position;
+		SpriteSheetName = mSpriteRowColumnLookupValuesByType.at(type).SpriteSheetName;
 	}
 
 	const XMFLOAT2& SpriteDemoManager::Position() const
@@ -57,19 +70,12 @@ namespace DirectXGame
 		blendStateDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;		
 		mAlphaBlending = nullptr;
 		ThrowIfFailed(mDeviceResources->GetD3DDevice()->CreateBlendState(&blendStateDesc, mAlphaBlending.put()));
-		
-		/*mSpriteSheet = nullptr;
-		ThrowIfFailed(DirectX::CreateWICTextureFromFile(mDeviceResources->GetD3DDevice(), L"Content\\Textures\\snoods_default.png", nullptr, mSpriteSheet.put()));
-		InitializeVertices();
-		InitializeSprites();
-		mSpriteCountDistribution = uniform_int_distribution<uint32_t>(0U, static_cast<uint32_t>(mSprites.size()) - 1);*/
 
-		// Load Start Menu Screen in SRV
-		mSpriteSheetMainMenu = nullptr;
-		ThrowIfFailed(DirectX::CreateWICTextureFromFile(mDeviceResources->GetD3DDevice(), L"Content\\Textures\\StartScreen.png", nullptr, mSpriteSheetMainMenu.put()));
-
-		// Load Start Menu
+		// Load Appropriate SpriteSheet in SRV
+		mSpriteSheet = nullptr;
+		ThrowIfFailed(DirectX::CreateWICTextureFromFile(mDeviceResources->GetD3DDevice(), SpriteSheetName.c_str(), nullptr, mSpriteSheet.put()));
 		InitializeVertices();
+		InitializeSprites(mType, mSprites);
 	}
 
 	void SpriteDemoManager::ReleaseDeviceDependentResources()
@@ -84,10 +90,69 @@ namespace DirectXGame
 		mTextureSampler = nullptr;
 
 		mSpriteSheetMainMenu = nullptr;
+		mSpriteSheetMainMenuBalloons = nullptr;
 	}
 
-	void SpriteDemoManager::Update(const StepTimer& /*timer*/)
-	{		
+	void SpriteDemoManager::UpdateData(const StepTimer& timer, StateManager::ActivePlayers activePlayers)
+	{
+		if (timer.GetTotalSeconds() > mLastDataUpdateTime + DataUpdateDelay)
+		{
+			mLastDataUpdateTime = timer.GetTotalSeconds();
+			auto instance = StateManager::GetInstance();
+			auto state = instance->getState();
+			//auto activePlayer = instance->getActivePlayers();
+			// If currently in the Main Menu
+			if (state == StateManager::GameState::MAIN_MENU)
+			{
+				if (mType == Sprite::SpriteTypeEnum::MAIN_MENU_BALLOONS && activePlayers == StateManager::ActivePlayers::PLAYER_ONE)
+				{
+					// set transform location for current sprite 
+					mSprites[mCurrentSpriteIndex]->SetTransform(mSpriteInitialPositionsLookup.at(SpriteInitialPositions::MENU_PLAYER_ONE_BALLOON));
+				}
+				if (mType == Sprite::SpriteTypeEnum::MAIN_MENU_BALLOONS && activePlayers == StateManager::ActivePlayers::PLAYER_ONE_AND_TWO)
+				{
+					// set transform location for current sprite 
+					mSprites[mCurrentSpriteIndex]->SetTransform(mSpriteInitialPositionsLookup.at(SpriteInitialPositions::MENU_PLAYER_TWO_BALLOON));
+				}
+			}
+
+			// If Player(s) is/are in the game.
+			if (state == StateManager::GameState::GAME_STARTED)
+			{
+			}
+
+		}
+
+	}
+
+	void SpriteDemoManager::Update(const StepTimer& timer)
+	{
+		if (timer.GetTotalSeconds() > mLastAnimationUpdateTime + AnimationUpdateDelay)
+		{
+			mLastAnimationUpdateTime = timer.GetTotalSeconds();
+			auto instance = StateManager::GetInstance();
+			auto state = instance->getState();
+			//auto activePlayer = instance->getActivePlayers();
+			// If currently in the Main Menu
+			if (state == StateManager::GameState::MAIN_MENU)
+			{
+				if (mCurrentSpriteIndex < mSprites.size() - 1)
+				{
+					++mCurrentSpriteIndex;
+				}
+				else
+				{
+					mCurrentSpriteIndex = 0;
+				}
+			}
+
+			// If Player(s) is/are in the game.
+			if (state == StateManager::GameState::GAME_STARTED)
+			{
+			}
+		}
+		
+
 		//if (timer.GetTotalSeconds() > mLastMoodUpdateTime + MoodUpdateDelay)
 		//{
 		//	mLastMoodUpdateTime = timer.GetTotalSeconds();
@@ -120,15 +185,8 @@ namespace DirectXGame
 		
 		winrt::impl::abi_t<ID3D11ShaderResourceView>* psShaderResources = nullptr;
 
-		if (!mIsGameStarted)
-		{
-			psShaderResources = mSpriteSheetMainMenu.get();
-		}
-		else
-		{
-			// Use different Sprite Sheets When game starts.
-		}
-		//const auto psShaderResources = mSpriteSheet.get();
+		
+		psShaderResources = mSpriteSheet.get();
 		direct3DDeviceContext->PSSetShaderResources(0, 1, &psShaderResources);
 
 		const auto vsConstantBuffers = mVSCBufferPerObject.get();
@@ -138,7 +196,9 @@ namespace DirectXGame
 		direct3DDeviceContext->PSSetSamplers(0, 1, &textureSamplers);
 		direct3DDeviceContext->OMSetBlendState(mAlphaBlending.get(), 0, 0xFFFFFFFF);
 
-		DrawSprite(MAIN_MENU_BACKGROUND_IMAGE_INDEX);
+		direct3DDeviceContext->PSSetShaderResources(0, 1, &psShaderResources);
+
+		DrawSprite(*mSprites[mCurrentSpriteIndex]);
 
 		/*for (const auto& sprite : mSprites)
 		{
@@ -170,6 +230,20 @@ namespace DirectXGame
 		XMStoreFloat4x4(&mVSCBufferPerObjectData.TextureTransform, XMMatrixTranspose(textureTransform));
 		direct3DDeviceContext->UpdateSubresource(mVSCBufferPerObject.get(), 0, nullptr, &mVSCBufferPerObjectData, 0, 0);
 
+		direct3DDeviceContext->DrawIndexed(mIndexCount, 0, 0);
+	}
+
+	void SpriteDemoManager::DrawSprite(Sprite& sprite)
+	{
+		ID3D11DeviceContext* direct3DDeviceContext = mDeviceResources->GetD3DDeviceContext();
+
+		const XMMATRIX wvp = XMMatrixTranspose(sprite.Transform().WorldMatrix() * mCamera->ViewProjectionMatrix());
+		XMStoreFloat4x4(&mVSCBufferPerObjectData.WorldViewProjection, wvp);
+
+		XMMATRIX textureTransform = XMLoadFloat4x4(&sprite.TextureTransform());
+		XMStoreFloat4x4(&mVSCBufferPerObjectData.TextureTransform, XMMatrixTranspose(textureTransform));
+
+		direct3DDeviceContext->UpdateSubresource(mVSCBufferPerObject.get(), 0, nullptr, &mVSCBufferPerObjectData, 0, 0);
 		direct3DDeviceContext->DrawIndexed(mIndexCount, 0, 0);
 	}
 
@@ -206,21 +280,30 @@ namespace DirectXGame
 		ThrowIfFailed(mDeviceResources->GetD3DDevice()->CreateBuffer(&indexBufferDesc, &indexSubResourceData, mIndexBuffer.put()));
 	}
 
-	void SpriteDemoManager::InitializeSprites()
-	{	
+	void SpriteDemoManager::InitializeSprites(Sprite::SpriteTypeEnum type, std::vector<std::shared_ptr<Sprite>>& sprites)
+	{
 		const XMFLOAT2 neighborOffset(2.0f, 2.0f);
-		for (uint32_t column = 0; column < mSpriteColumnCount; ++column)		
+		uint32_t spriteIndex = 0;
+		for (uint32_t column = 0; column < mSpriteRowColumnLookupValuesByType.at(type).SpriteColumnCount; ++column)
 		{
-			for (uint32_t row = 0; row < mSpriteRowCount; ++row)
+			for (uint32_t row = 0; row < mSpriteRowColumnLookupValuesByType.at(type).SpriteRowCount; ++row, ++spriteIndex)
 			{
-				XMFLOAT2 position(mPosition.x + column * neighborOffset.x * SpriteScale.x, mPosition.y + row * neighborOffset.y * SpriteScale.y);
-				Transform2D transform(position, 0.0f, SpriteScale);								
-				uint32_t spriteIndex = mSpriteDistribution(mRandomGenerator);
-				auto sprite = make_shared<MoodySprite>(spriteIndex, transform);
-				ChangeMood(*sprite);
-				mSprites.push_back(move(sprite));
+				// Set Position of the Sprite. We can default it to zero ( Currently Calculated based on row, column & neighborOffset )
+				XMFLOAT2 position(mPosition.x,mPosition.y/*mPosition.x + column * neighborOffset.x * SpriteScale.x, mPosition.y + row * neighborOffset.y * SpriteScale.y*/);
+				Transform2D transform(position, 0.0f, SpriteScale);
+				auto sprite = make_shared<Sprite>(spriteIndex, transform, type);
+
+				// Set Position of the Texture for specific Sprite. We use UV scaling to slap appropriate texture for sprite.
+				XMFLOAT4X4 textureTransform;
+				XMMATRIX textureTransformMatrix = XMMatrixScaling(UVScalingFactor.x, UVScalingFactor.y, 0) * XMMatrixTranslation(UVScalingFactor.x * sprite->SpriteIndex(), /*UVScalingFactor.y * sprite->SpriteIndex()*/ 0, 0.0f);
+				XMStoreFloat4x4(&textureTransform, textureTransformMatrix);
+				sprite->SetTextureTransform(textureTransform);
+
+				// Finally we store sprite into our array
+				sprites.push_back(move(sprite));
 			}
 		}
+		(void)0;
 	}
 
 	void SpriteDemoManager::ChangeMood(MoodySprite& sprite)
