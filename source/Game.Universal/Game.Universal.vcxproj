@@ -139,6 +139,8 @@
       <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)Content\Textures\</DestinationFolders>
     </CopyFileToFolders>
     <Image Include="Content\Textures\AllSprites.png" />
+    <Image Include="Content\Textures\Level.png" />
+    <Image Include="Content\Textures\Player_One.png" />
     <Image Include="Content\Textures\StartScreen.png" />
     <Image Include="Content\Textures\StartScreenBalloons.png" />
   </ItemGroup>

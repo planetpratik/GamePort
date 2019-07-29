@@ -87,6 +87,13 @@ namespace DirectXGame
 		imGui->AddRenderBlock(helpTextImGuiRenderBlock);
 
 		InitializeResources();
+
+		/*auto device = mDeviceResources->GetD3DDevice();
+		ZeroMemory(&desc, sizeof(D3D11_RASTERIZER_DESC));
+		desc.FillMode = D3D11_FILL_WIREFRAME;
+		desc.CullMode = D3D11_CULL_NONE;
+		auto result = device->CreateRasterizerState(&desc, &mRasterizerState);
+		result;*/
 	}
 
 	void Game::Tick()
@@ -107,6 +114,8 @@ namespace DirectXGame
 		auto instance = StateManager::GetInstance();
 		auto state = instance->getState();
 		auto activePlayers = instance->getActivePlayers();
+
+		// Update Game entities data
 		if (state == StateManager::GameState::MAIN_MENU)
 		{
 			if (activePlayers == StateManager::ActivePlayers::PLAYER_ONE)
@@ -121,6 +130,19 @@ namespace DirectXGame
 			}
 		}
 
+		if (state == StateManager::GameState::GAME_STARTED)
+		{
+			if (activePlayers == StateManager::ActivePlayers::PLAYER_ONE)
+			{
+			}
+			if (activePlayers == StateManager::ActivePlayers::PLAYER_ONE_AND_TWO)
+			{
+			}
+
+		}
+
+		// As we have updated data, now actually apply those updates to entity
+
 		for (auto& component : mComponents)
 		{
 			component->Update(timer);
@@ -130,6 +152,26 @@ namespace DirectXGame
 			mGamePad->WasButtonPressedThisFrame(GamePadButtons::Back))
 		{
 			ExitGame();
+		}
+
+		// Check inputs
+
+		if (state == StateManager::GameState::MAIN_MENU)
+		{
+			if (mKeyboard->WasKeyPressedThisFrame(DX::Keys::Enter))
+			{
+				auto it = std::find(mComponents.begin(), mComponents.end(), mMainMenuScreen);
+				mComponents.erase(it);
+				it = std::find(mComponents.begin(), mComponents.end(), mMainMenuBalloons);
+				mComponents.erase(it);
+				mComponents.push_back(mPlayerOne);
+				mComponents.push_back(mLevelScreen);
+				mPlayerOne->CreateDeviceDependentResources();
+				mPlayerOne->CreateWindowSizeDependentResources();
+				mLevelScreen->CreateDeviceDependentResources();
+				mLevelScreen->CreateWindowSizeDependentResources();
+				instance->setState(StateManager::GameState::GAME_STARTED);
+			}
 		}
 
 		PIXEndEvent();
@@ -170,6 +212,8 @@ namespace DirectXGame
 	{
 		auto context = mDeviceResources->GetD3DDeviceContext();
 		PIXBeginEvent(context, PIX_COLOR_DEFAULT, L"Clear");
+
+		//context->RSSetState(mRasterizerState);
 
 		// Clear the views.
 		auto renderTarget = mDeviceResources->GetRenderTargetView();
@@ -280,6 +324,9 @@ namespace DirectXGame
 		mComponents.push_back(mMainMenuScreen);
 		auto instance = StateManager::GetInstance();
 		instance->setActivePlayers(StateManager::ActivePlayers::PLAYER_ONE);
+
+		mPlayerOne = make_shared<SpriteDemoManager>(mDeviceResources, mCamera, Sprite::SpriteTypeEnum::PLAYER_ONE);
+		mLevelScreen = make_shared<SpriteDemoManager>(mDeviceResources, mCamera, Sprite::SpriteTypeEnum::LEVEL_SCREEN);
 	}
 #pragma endregion
 }

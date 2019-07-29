@@ -16,13 +16,15 @@ namespace DirectXGame
 	{
 		{ Sprite::SpriteTypeEnum::MAIN_MENU_SCREEN, {1u, 1u, {0.0, 0.0}, {50, 50}, {1.0f, 1.0f}, L"Content\\Textures\\StartScreen.png"}},
 		{ Sprite::SpriteTypeEnum::MAIN_MENU_BALLOONS, {1u, 4u, {-20.0f, -10.0f}, {2, 4}, {1.0f/4, 1.0f}, L"Content\\Textures\\StartScreenBalloons.png"}},
-		{ Sprite::SpriteTypeEnum::LEVEL_SCREEN, {1u, 1u, {0.0, 0.0}, {50, 50}, {1.0f, 1.0f}, L"Content\\Textures\\StartScreenBalloons.png"}},
+		{ Sprite::SpriteTypeEnum::LEVEL_SCREEN, {1u, 1u, {0.0, 0.0}, {50, 50}, {1.0f, 1.0f}, L"Content\\Textures\\Level.png"}},
+		{ Sprite::SpriteTypeEnum::PLAYER_ONE, {7u, 10u, {-40.0, -35.0}, {2, 3.2}, {1.0f/9, 1.0f}, L"Content\\Textures\\Player_One.png"}},
 	};
 
 	const std::unordered_map<SpriteDemoManager::SpriteInitialPositions, DirectX::XMFLOAT2> SpriteDemoManager::mSpriteInitialPositionsLookup =
 	{
 		{ SpriteDemoManager::SpriteInitialPositions::MENU_PLAYER_ONE_BALLOON, DirectX::XMFLOAT2(-20.0f, -10.0f)},
 		{ SpriteDemoManager::SpriteInitialPositions::MENU_PLAYER_TWO_BALLOON, DirectX::XMFLOAT2(0.0f, 0.0f)},
+		{ SpriteDemoManager::SpriteInitialPositions::PLAYER_ONE, DirectX::XMFLOAT2(-40.0f, -35.0f)},
 	};
 
 	SpriteDemoManager::SpriteDemoManager(const shared_ptr<DX::DeviceResources>& deviceResources, const shared_ptr<Camera>& camera, Sprite::SpriteTypeEnum type) :
@@ -119,6 +121,7 @@ namespace DirectXGame
 			// If Player(s) is/are in the game.
 			if (state == StateManager::GameState::GAME_STARTED)
 			{
+				
 			}
 
 		}
@@ -237,7 +240,14 @@ namespace DirectXGame
 	{
 		ID3D11DeviceContext* direct3DDeviceContext = mDeviceResources->GetD3DDeviceContext();
 
-		const XMMATRIX wvp = XMMatrixTranspose(sprite.Transform().WorldMatrix() * mCamera->ViewProjectionMatrix());
+		DirectX::XMMATRIX ProjectionMatrix = mCamera->ProjectionMatrix();
+		if (mType == Sprite::SpriteTypeEnum::PLAYER_ONE)
+		{
+			//ProjectionMatrix = XMMatrixMultiply(ProjectionMatrix,XMMatrixScaling(1, -1, 1));
+		}
+		DirectX::XMMATRIX ViewProjectionMatrix = XMMatrixMultiply(mCamera->ViewMatrix(), ProjectionMatrix);
+
+		const XMMATRIX wvp = XMMatrixTranspose(sprite.Transform().WorldMatrix() * ViewProjectionMatrix/*mCamera->ViewProjectionMatrix()*/);
 		XMStoreFloat4x4(&mVSCBufferPerObjectData.WorldViewProjection, wvp);
 
 		XMMATRIX textureTransform = XMLoadFloat4x4(&sprite.TextureTransform());
