@@ -75,9 +75,9 @@ namespace DirectXGame
 		desc.FillMode = D3D11_FILL_SOLID;
 		desc.CullMode = D3D11_CULL_NONE;
 		desc.DepthClipEnable = true;
-		device->CreateRasterizerState(&desc, &mRasterizerState);
+		device->CreateRasterizerState(&desc, mRasterizerState.put());
 		auto context = mDeviceResources->GetD3DDeviceContext();
-		context->RSSetState(mRasterizerState);
+		context->RSSetState(mRasterizerState.get());
 
 		// Create Depth Stencil
 		D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
@@ -174,9 +174,6 @@ namespace DirectXGame
 				mComponents.erase(it);
 				it = std::find(mComponents.begin(), mComponents.end(), mMainMenuBalloons);
 				mComponents.erase(it);
-				Clear();
-				/*mComponents.push_back(mPlayerOne);
-				mComponents.push_back(mLevelScreen);*/
 				mComponents.push_back(mLevelScreen);
 				mComponents.push_back(mPlayerOne);
 				mPlayerOne->CreateDeviceDependentResources();

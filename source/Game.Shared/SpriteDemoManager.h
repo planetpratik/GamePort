@@ -46,10 +46,7 @@ namespace DirectXGame
 			{ }
 		};
 
-		void DrawSprite(MoodySprite& sprite);
 		void InitializeVertices();
-		void ChangeMood(MoodySprite& sprite);
-		MoodySprite::Moods GetRandomMood();
 
 		inline static const std::uint32_t SpriteCount{ 8 }; // Sprites are arranged horizontally within the sprite sheet
 		inline static const std::uint32_t MoodCount{ 4 }; // Moods are arranged vertically within the sprite sheet
@@ -118,7 +115,6 @@ namespace DirectXGame
 		double mLastDataUpdateTime;
 		uint32_t mCurrentSpriteIndex;
 
-		void DrawSprite(/*winrt::com_ptr<ID3D11Texture2D>*/ int backgroundImageSprite);
 		void DrawSprite(Sprite& sprite);
 		void InitializeSprites(Sprite::SpriteTypeEnum type, std::vector<std::shared_ptr<Sprite>>& mSprites);
 	};

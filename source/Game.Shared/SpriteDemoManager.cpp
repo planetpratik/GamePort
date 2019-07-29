@@ -154,21 +154,6 @@ namespace DirectXGame
 			{
 			}
 		}
-		
-
-		//if (timer.GetTotalSeconds() > mLastMoodUpdateTime + MoodUpdateDelay)
-		//{
-		//	mLastMoodUpdateTime = timer.GetTotalSeconds();
-
-		//	uint32_t spritesToChange = mSpriteCountDistribution(mRandomGenerator);
-		//	for (uint32_t i = 0; i < spritesToChange; ++i)
-		//	{
-		//		uint32_t spriteIndex = mSpriteCountDistribution(mRandomGenerator);
-		//		spriteIndex;
-		//		//auto sprite = mSprites[spriteIndex];
-		//		//ChangeMood(*sprite);
-		//	}
-		//}
 	}
 
 	void SpriteDemoManager::Render(const StepTimer& /* timer */)
@@ -207,33 +192,6 @@ namespace DirectXGame
 		{
 			DrawSprite(*sprite);
 		}*/
-	}
-
-	void SpriteDemoManager::DrawSprite(MoodySprite& sprite)
-	{
-		ID3D11DeviceContext* direct3DDeviceContext = mDeviceResources->GetD3DDeviceContext();
-		
-		const XMMATRIX wvp = XMMatrixTranspose(sprite.Transform().WorldMatrix() * mCamera->ViewProjectionMatrix());
-		XMStoreFloat4x4(&mVSCBufferPerObjectData.WorldViewProjection, wvp);
-		XMMATRIX textureTransform = XMLoadFloat4x4(&sprite.TextureTransform());
-		XMStoreFloat4x4(&mVSCBufferPerObjectData.TextureTransform, XMMatrixTranspose(textureTransform));		 
-		direct3DDeviceContext->UpdateSubresource(mVSCBufferPerObject.get(), 0, nullptr, &mVSCBufferPerObjectData, 0, 0);
-
-		direct3DDeviceContext->DrawIndexed(mIndexCount, 0, 0);
-	}
-
-	void SpriteDemoManager::DrawSprite(int/*winrt::com_ptr<ID3D11Texture2D>*/ /*backgroundImageSprite*/)
-	{
-		ID3D11DeviceContext* direct3DDeviceContext = mDeviceResources->GetD3DDeviceContext();
-		XMFLOAT2 position(mPosition.x, mPosition.y);
-		Transform2D transform(position, 0.0f, BackgroundImageScale);
-		const XMMATRIX wvp = XMMatrixTranspose(transform.WorldMatrix() * mCamera->ViewProjectionMatrix());
-		XMStoreFloat4x4(&mVSCBufferPerObjectData.WorldViewProjection, wvp);
-		XMMATRIX textureTransform = XMLoadFloat4x4(&DX::MatrixHelper::Identity);
-		XMStoreFloat4x4(&mVSCBufferPerObjectData.TextureTransform, XMMatrixTranspose(textureTransform));
-		direct3DDeviceContext->UpdateSubresource(mVSCBufferPerObject.get(), 0, nullptr, &mVSCBufferPerObjectData, 0, 0);
-
-		direct3DDeviceContext->DrawIndexed(mIndexCount, 0, 0);
 	}
 
 	void SpriteDemoManager::DrawSprite(Sprite& sprite)
@@ -314,20 +272,5 @@ namespace DirectXGame
 			}
 		}
 		(void)0;
-	}
-
-	void SpriteDemoManager::ChangeMood(MoodySprite& sprite)
-	{
-		MoodySprite::Moods mood = GetRandomMood();
-
-		XMFLOAT4X4 textureTransform;
-		XMMATRIX textureTransformMatrix = XMMatrixScaling(UVScalingFactor.x, UVScalingFactor.y, 0) * XMMatrixTranslation(UVScalingFactor.x * sprite.SpriteIndex(), UVScalingFactor.y * static_cast<uint32_t>(mood), 0.0f);
-		XMStoreFloat4x4(&textureTransform, textureTransformMatrix);
-		sprite.SetTextureTransform(textureTransform);
-	}
-
-	MoodySprite::Moods SpriteDemoManager::GetRandomMood()
-	{
-		return static_cast<MoodySprite::Moods>(mMoodDistribution(mRandomGenerator));
 	}
 }
