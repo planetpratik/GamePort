@@ -243,7 +243,7 @@ namespace DirectXGame
 		DirectX::XMMATRIX ProjectionMatrix = mCamera->ProjectionMatrix();
 		if (mType == Sprite::SpriteTypeEnum::PLAYER_ONE)
 		{
-			//ProjectionMatrix = XMMatrixMultiply(ProjectionMatrix,XMMatrixScaling(1, -1, 1));
+			//ProjectionMatrix = XMMatrixMultiply(ProjectionMatrix,XMMatrixScaling(-1, 1, 1));
 		}
 		DirectX::XMMATRIX ViewProjectionMatrix = XMMatrixMultiply(mCamera->ViewMatrix(), ProjectionMatrix);
 

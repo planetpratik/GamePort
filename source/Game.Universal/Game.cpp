@@ -67,33 +67,43 @@ namespace DirectXGame
 		mFpsComponent->SetVisible(false);
 		mComponents.push_back(mFpsComponent);
 
-		auto imGui = make_shared<ImGuiComponent>(mDeviceResources);
-		mComponents.push_back(imGui);
-
-		auto helpTextImGuiRenderBlock = make_shared<ImGuiComponent::RenderBlock>([this]()
-			{
-				ImGui::Begin("Balloon Fight");
-				ImGui::SetNextWindowPos(ImVec2(10, 10));
-
-				{
-					stringstream fpsLabel;
-					fpsLabel << setprecision(3) << "Frame Rate: " << mFpsComponent->FrameRate() << "  Total Elapsed Time: " << mTimer.GetTotalSeconds() << "  ";
-					
-					ImGui::Text(fpsLabel.str().c_str());
-				}
-
-				ImGui::End();
-			});
-		imGui->AddRenderBlock(helpTextImGuiRenderBlock);
-
 		InitializeResources();
 
-		/*auto device = mDeviceResources->GetD3DDevice();
+		// Set Rasterizer Cull mode to None.
+		auto device = mDeviceResources->GetD3DDevice();
 		ZeroMemory(&desc, sizeof(D3D11_RASTERIZER_DESC));
-		desc.FillMode = D3D11_FILL_WIREFRAME;
+		desc.FillMode = D3D11_FILL_SOLID;
 		desc.CullMode = D3D11_CULL_NONE;
-		auto result = device->CreateRasterizerState(&desc, &mRasterizerState);
-		result;*/
+		desc.DepthClipEnable = true;
+		device->CreateRasterizerState(&desc, &mRasterizerState);
+		auto context = mDeviceResources->GetD3DDeviceContext();
+		context->RSSetState(mRasterizerState);
+
+		// Create Depth Stencil
+		D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
+		depthStencilDesc.DepthEnable = TRUE;
+		depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+		depthStencilDesc.DepthFunc = D3D11_COMPARISON_ALWAYS;
+		depthStencilDesc.StencilEnable = FALSE;
+		depthStencilDesc.StencilReadMask = 0xFF;
+		depthStencilDesc.StencilWriteMask = 0xFF;
+
+		// Stencil operations if pixel is front-facing
+		depthStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+		depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
+		depthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+		depthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+		// Stencil operations if pixel is back-facing
+		depthStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+		depthStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
+		depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+		depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+		device->CreateDepthStencilState(&depthStencilDesc, m_DepthStencilState.put());
+		context->OMSetDepthStencilState(m_DepthStencilState.get(), 0);
+
+
 	}
 
 	void Game::Tick()
@@ -164,8 +174,11 @@ namespace DirectXGame
 				mComponents.erase(it);
 				it = std::find(mComponents.begin(), mComponents.end(), mMainMenuBalloons);
 				mComponents.erase(it);
-				mComponents.push_back(mPlayerOne);
+				Clear();
+				/*mComponents.push_back(mPlayerOne);
+				mComponents.push_back(mLevelScreen);*/
 				mComponents.push_back(mLevelScreen);
+				mComponents.push_back(mPlayerOne);
 				mPlayerOne->CreateDeviceDependentResources();
 				mPlayerOne->CreateWindowSizeDependentResources();
 				mLevelScreen->CreateDeviceDependentResources();
@@ -213,13 +226,10 @@ namespace DirectXGame
 		auto context = mDeviceResources->GetD3DDeviceContext();
 		PIXBeginEvent(context, PIX_COLOR_DEFAULT, L"Clear");
 
-		//context->RSSetState(mRasterizerState);
-
 		// Clear the views.
 		auto renderTarget = mDeviceResources->GetRenderTargetView();
 		auto depthStencil = mDeviceResources->GetDepthStencilView();
-
-		context->ClearRenderTargetView(renderTarget, Colors::Black);
+		context->ClearRenderTargetView(renderTarget, Colors::Purple);
 		context->ClearDepthStencilView(depthStencil, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 		context->OMSetRenderTargets(1, &renderTarget, depthStencil);
 
@@ -318,10 +328,10 @@ namespace DirectXGame
 
 	void Game::InitializeGameObjects()
 	{
-		mMainMenuBalloons = make_shared<SpriteDemoManager>(mDeviceResources, mCamera, Sprite::SpriteTypeEnum::MAIN_MENU_BALLOONS);
-		mComponents.push_back(mMainMenuBalloons);
 		mMainMenuScreen = make_shared<SpriteDemoManager>(mDeviceResources, mCamera, Sprite::SpriteTypeEnum::MAIN_MENU_SCREEN);
 		mComponents.push_back(mMainMenuScreen);
+		mMainMenuBalloons = make_shared<SpriteDemoManager>(mDeviceResources, mCamera, Sprite::SpriteTypeEnum::MAIN_MENU_BALLOONS);
+		mComponents.push_back(mMainMenuBalloons);
 		auto instance = StateManager::GetInstance();
 		instance->setActivePlayers(StateManager::ActivePlayers::PLAYER_ONE);
 

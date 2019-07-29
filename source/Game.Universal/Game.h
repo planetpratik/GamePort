@@ -70,6 +70,8 @@ namespace DirectXGame
 		std::shared_ptr<SpriteDemoManager> mEnemyThree;
 
 		//std::shared_ptr<ID3D11RasterizerState*> mRasterizerState;
+		winrt::com_ptr<ID3D11DepthStencilState> m_DepthStencilState;
+
 		ID3D11RasterizerState* mRasterizerState;
 		D3D11_RASTERIZER_DESC desc = {};
 
