@@ -102,8 +102,6 @@ namespace DirectXGame
 
 		device->CreateDepthStencilState(&depthStencilDesc, m_DepthStencilState.put());
 		context->OMSetDepthStencilState(m_DepthStencilState.get(), 0);
-
-
 	}
 
 	void Game::Tick()
@@ -131,12 +129,11 @@ namespace DirectXGame
 			if (activePlayers == StateManager::ActivePlayers::PLAYER_ONE)
 			{
 				// If Key not pressed, keep updating current sprite animation
-				mMainMenuBalloons->UpdateData(timer, StateManager::ActivePlayers::PLAYER_ONE);
-
+				mMainMenuBalloons->UpdateData(timer, StateManager::ActivePlayers::PLAYER_ONE, *mKeyboard);
 			}
 			if (activePlayers == StateManager::ActivePlayers::PLAYER_ONE_AND_TWO)
 			{
-				mMainMenuBalloons->UpdateData(timer, StateManager::ActivePlayers::PLAYER_ONE_AND_TWO);
+				mMainMenuBalloons->UpdateData(timer, StateManager::ActivePlayers::PLAYER_ONE_AND_TWO, *mKeyboard);
 			}
 		}
 
@@ -144,12 +141,13 @@ namespace DirectXGame
 		{
 			if (activePlayers == StateManager::ActivePlayers::PLAYER_ONE)
 			{
+				mPlayerOne->UpdateData(timer, StateManager::ActivePlayers::PLAYER_ONE, *mKeyboard);
 			}
 			if (activePlayers == StateManager::ActivePlayers::PLAYER_ONE_AND_TWO)
 			{
 			}
-
 		}
+
 
 		// As we have updated data, now actually apply those updates to entity
 
@@ -184,6 +182,21 @@ namespace DirectXGame
 			}
 		}
 
+		if (state == StateManager::GameState::GAME_STARTED)
+		{
+			if (mKeyboard->WasKeyDown(DX::Keys::A))
+			{
+				mPlayerOne->SetPlayerXMovement(Sprite::SpriteTypeEnum::PLAYER_ONE, -2.0f);
+			}
+			if (mKeyboard->WasKeyDown(DX::Keys::D))
+			{
+				mPlayerOne->SetPlayerXMovement(Sprite::SpriteTypeEnum::PLAYER_ONE, 2.0f);
+			}
+			if (mKeyboard->WasKeyPressedThisFrame(DX::Keys::J))
+			{
+				mPlayerOne->SetPlayerYMovement(Sprite::SpriteTypeEnum::PLAYER_ONE, 2.0f);
+			}
+		}
 		PIXEndEvent();
 	}
 

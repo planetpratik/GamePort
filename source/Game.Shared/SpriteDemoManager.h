@@ -9,6 +9,11 @@
 #include <random>
 #include <tuple>
 
+namespace DX
+{
+	class KeyboardComponent;
+}
+
 namespace DirectXGame
 {
 	class SpriteDemoManager final : public DX::DrawableGameComponent
@@ -21,6 +26,7 @@ namespace DirectXGame
 
 		virtual void CreateDeviceDependentResources() override;
 		virtual void ReleaseDeviceDependentResources() override;
+		
 		virtual void Update(const DX::StepTimer& timer) override;
 		virtual void Render(const DX::StepTimer& timer) override;
 
@@ -30,6 +36,7 @@ namespace DirectXGame
 		std::wstring SpriteSheetName;
 		double AnimationUpdateDelay{ 0.5 }; // Delay between Animation changes, in seconds
 		double DataUpdateDelay{ 0.5 }; // Delay between Animation changes, in seconds
+		double Force{ 2.0 };
 
 	private:
 		struct VSCBufferPerObject
@@ -96,12 +103,27 @@ namespace DirectXGame
 			PLAYER_TWO
 		};
 
+		enum class PlayerMoveDirection
+		{
+			LEFT,
+			RIGHT
+		};
+
+		enum class PlayerState
+		{
+			STANDING,
+			FLYING,
+			FALLING,
+			DEAD
+		};
+
 		inline static const DirectX::XMFLOAT2 BackgroundImageScale{ DirectX::XMFLOAT2(50.0f, 50.0f) };
 		inline static const int MAIN_MENU_BACKGROUND_IMAGE_INDEX = 0;
 		static const std::unordered_map<Sprite::SpriteTypeEnum, RowColumnLookupInfo> mSpriteRowColumnLookupValuesByType;
 		static const std::unordered_map<SpriteInitialPositions, DirectX::XMFLOAT2> mSpriteInitialPositionsLookup;
-		void UpdateData(const DX::StepTimer& timer, StateManager::ActivePlayers activePlayers);
-
+		void UpdateData(const DX::StepTimer& timer, StateManager::ActivePlayers activePlayers, DX::KeyboardComponent mKeyboard);
+		void SetPlayerXMovement(Sprite::SpriteTypeEnum player, float movement);
+		void SetPlayerYMovement(Sprite::SpriteTypeEnum player, float movement);
 	private:
 		winrt::com_ptr<ID3D11ShaderResourceView> mSpriteSheetMainMenu;
 		winrt::com_ptr<ID3D11ShaderResourceView> mSpriteSheetMainMenuBalloons;
@@ -111,9 +133,16 @@ namespace DirectXGame
 		std::vector<std::shared_ptr<Sprite>> mSprites;
 		Sprite::SpriteTypeEnum mType;
 		SpriteInitialPositions mSpriteInitialPositions;
+		PlayerMoveDirection mPlayerMoveDirection;
+		PlayerMoveDirection mPreviousMoveDirection;
+		PlayerState mPlayerState;
+		bool isPlayerAlreadyFlipped = false;
 		double mLastAnimationUpdateTime;
 		double mLastDataUpdateTime;
 		uint32_t mCurrentSpriteIndex;
+
+		DirectX::XMFLOAT2 mPlayerOneMovement = {0.0f, 0.0f};
+
 
 		void DrawSprite(Sprite& sprite);
 		void InitializeSprites(Sprite::SpriteTypeEnum type, std::vector<std::shared_ptr<Sprite>>& mSprites);

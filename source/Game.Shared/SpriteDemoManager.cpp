@@ -4,6 +4,7 @@
 #include "VertexDeclarations.h"
 #include "Utility.h"
 #include "Camera.h"
+#include "KeyboardComponent.h"
 
 using namespace std;
 using namespace gsl;
@@ -17,7 +18,7 @@ namespace DirectXGame
 		{ Sprite::SpriteTypeEnum::MAIN_MENU_SCREEN, {1u, 1u, {0.0, 0.0}, {50, 50}, {1.0f, 1.0f}, L"Content\\Textures\\StartScreen.png"}},
 		{ Sprite::SpriteTypeEnum::MAIN_MENU_BALLOONS, {1u, 4u, {-20.0f, -10.0f}, {2, 4}, {1.0f/4, 1.0f}, L"Content\\Textures\\StartScreenBalloons.png"}},
 		{ Sprite::SpriteTypeEnum::LEVEL_SCREEN, {1u, 1u, {0.0, 0.0}, {50, 50}, {1.0f, 1.0f}, L"Content\\Textures\\Level.png"}},
-		{ Sprite::SpriteTypeEnum::PLAYER_ONE, {7u, 10u, {-40.0, -35.0}, {2, 3.2}, {1.0f/9, 1.0f}, L"Content\\Textures\\Player_One.png"}},
+		{ Sprite::SpriteTypeEnum::PLAYER_ONE, {7u, 10u, {-40.0, -35.0}, {2.5, 4}, {1.0f/9, 1.0f}, L"Content\\Textures\\Player_One.png"}},
 	};
 
 	const std::unordered_map<SpriteDemoManager::SpriteInitialPositions, DirectX::XMFLOAT2> SpriteDemoManager::mSpriteInitialPositionsLookup =
@@ -34,6 +35,8 @@ namespace DirectXGame
 		UVScalingFactor = mSpriteRowColumnLookupValuesByType.at(type).UVScalingFactor;
 		mPosition = mSpriteRowColumnLookupValuesByType.at(type).Position;
 		SpriteSheetName = mSpriteRowColumnLookupValuesByType.at(type).SpriteSheetName;
+		mPlayerMoveDirection = PlayerMoveDirection::RIGHT;
+		mPlayerState = PlayerState::STANDING;
 	}
 
 	const XMFLOAT2& SpriteDemoManager::Position() const
@@ -95,7 +98,51 @@ namespace DirectXGame
 		mSpriteSheetMainMenuBalloons = nullptr;
 	}
 
-	void SpriteDemoManager::UpdateData(const StepTimer& timer, StateManager::ActivePlayers activePlayers)
+	void SpriteDemoManager::SetPlayerXMovement(Sprite::SpriteTypeEnum player, float movement)
+	{
+		if (player == Sprite::SpriteTypeEnum::PLAYER_ONE )
+		{
+			if (mPlayerState == PlayerState::STANDING || mPlayerState == PlayerState::FLYING)
+			{
+				// Simply flip Sprite based on current orientation
+				if (mPlayerMoveDirection == PlayerMoveDirection::LEFT && movement > 0)
+				{
+					mPlayerMoveDirection = PlayerMoveDirection::RIGHT;
+					//isPlayerAlreadyFlipped = false;
+				}
+				if (mPlayerMoveDirection == PlayerMoveDirection::RIGHT && movement < 0)
+				{
+					mPlayerMoveDirection = PlayerMoveDirection::LEFT;
+				}
+			}
+			if(mPlayerState != PlayerState::DEAD)
+			{
+				// If player is alive then only update position,
+				mPlayerOneMovement.x += movement / 15;
+
+				// If player goes out of screen, make him appear entering from other side.
+
+				if (mPlayerOneMovement.x > 88)
+				{
+					mPlayerOneMovement.x = -8;
+				}
+				if (mPlayerOneMovement.x < -8)
+				{
+					mPlayerOneMovement.x = 88;
+				}
+			}
+		}
+	}
+
+	void SpriteDemoManager::SetPlayerYMovement(Sprite::SpriteTypeEnum player, float movement)
+	{
+		if (player == Sprite::SpriteTypeEnum::PLAYER_ONE)
+		{
+			movement;
+		}
+	}
+
+	void SpriteDemoManager::UpdateData(const StepTimer& timer, StateManager::ActivePlayers activePlayers, DX::KeyboardComponent mKeyboard)
 	{
 		if (timer.GetTotalSeconds() > mLastDataUpdateTime + DataUpdateDelay)
 		{
@@ -123,9 +170,11 @@ namespace DirectXGame
 			{
 				
 			}
+			if (mType == Sprite::SpriteTypeEnum::PLAYER_ONE && activePlayers == StateManager::ActivePlayers::PLAYER_ONE)
+			{
 
+			}
 		}
-
 	}
 
 	void SpriteDemoManager::Update(const StepTimer& timer)
@@ -152,6 +201,7 @@ namespace DirectXGame
 			// If Player(s) is/are in the game.
 			if (state == StateManager::GameState::GAME_STARTED)
 			{
+				// Do player & Enemy animations here. 
 			}
 		}
 	}
@@ -173,7 +223,6 @@ namespace DirectXGame
 		
 		winrt::impl::abi_t<ID3D11ShaderResourceView>* psShaderResources = nullptr;
 
-		
 		psShaderResources = mSpriteSheet.get();
 		direct3DDeviceContext->PSSetShaderResources(0, 1, &psShaderResources);
 
@@ -199,13 +248,29 @@ namespace DirectXGame
 		ID3D11DeviceContext* direct3DDeviceContext = mDeviceResources->GetD3DDeviceContext();
 
 		DirectX::XMMATRIX ProjectionMatrix = mCamera->ProjectionMatrix();
+		DX::Transform2D Transform = sprite.Transform();
+
 		if (mType == Sprite::SpriteTypeEnum::PLAYER_ONE)
 		{
-			//ProjectionMatrix = XMMatrixMultiply(ProjectionMatrix,XMMatrixScaling(-1, 1, 1));
+			if (mPlayerMoveDirection == PlayerMoveDirection::RIGHT)
+			{
+				ProjectionMatrix = XMMatrixMultiply(ProjectionMatrix, XMMatrixScaling(-1, 1, 1));
+				auto position = Transform.Position();
+				Transform.SetPosition(-position.x - mPlayerOneMovement.x, position.y - mPlayerOneMovement.y);
+				Transform.SetRotation(0.0f);
+				Transform.SetScale(SpriteScale);
+			}
+			if (mPlayerMoveDirection == PlayerMoveDirection::LEFT)
+			{
+				auto position = Transform.Position();
+				Transform.SetPosition(position.x + mPlayerOneMovement.x, position.y + mPlayerOneMovement.y);
+				Transform.SetRotation(0.0f);
+				Transform.SetScale(SpriteScale);
+			}
 		}
-		DirectX::XMMATRIX ViewProjectionMatrix = XMMatrixMultiply(mCamera->ViewMatrix(), ProjectionMatrix);
 
-		const XMMATRIX wvp = XMMatrixTranspose(sprite.Transform().WorldMatrix() * ViewProjectionMatrix/*mCamera->ViewProjectionMatrix()*/);
+		DirectX::XMMATRIX ViewProjectionMatrix = XMMatrixMultiply(mCamera->ViewMatrix(), ProjectionMatrix);
+		const XMMATRIX wvp = XMMatrixTranspose(Transform.WorldMatrix() * ViewProjectionMatrix);
 		XMStoreFloat4x4(&mVSCBufferPerObjectData.WorldViewProjection, wvp);
 
 		XMMATRIX textureTransform = XMLoadFloat4x4(&sprite.TextureTransform());
