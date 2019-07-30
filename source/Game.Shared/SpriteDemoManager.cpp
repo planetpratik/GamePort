@@ -21,11 +21,18 @@ namespace DirectXGame
 		{ Sprite::SpriteTypeEnum::PLAYER_ONE, {7u, 10u, {-40.0, -35.0}, {2.5, 4}, {1.0f/9, 1.0f}, L"Content\\Textures\\Player_One.png"}},
 	};
 
-	const std::unordered_map<SpriteDemoManager::SpriteInitialPositions, DirectX::XMFLOAT2> SpriteDemoManager::mSpriteInitialPositionsLookup =
+	/*const std::unordered_map<SpriteDemoManager::SpriteInitialPositions, DirectX::XMFLOAT2> SpriteDemoManager::mSpriteInitialPositionsLookup =
 	{
 		{ SpriteDemoManager::SpriteInitialPositions::MENU_PLAYER_ONE_BALLOON, DirectX::XMFLOAT2(-20.0f, -10.0f)},
 		{ SpriteDemoManager::SpriteInitialPositions::MENU_PLAYER_TWO_BALLOON, DirectX::XMFLOAT2(0.0f, 0.0f)},
 		{ SpriteDemoManager::SpriteInitialPositions::PLAYER_ONE, DirectX::XMFLOAT2(-40.0f, -35.0f)},
+	};*/
+
+	const std::unordered_map<SpriteDemoManager::SpriteInitialPositions, DX::Transform2D> SpriteDemoManager::mSpriteInitialPositionsLookup =
+	{
+		{ SpriteDemoManager::SpriteInitialPositions::MENU_PLAYER_ONE_BALLOON, DX::Transform2D(XMFLOAT2(-20.0f, -10.0f), 0.0f, XMFLOAT2(2,4))},
+		{ SpriteDemoManager::SpriteInitialPositions::MENU_PLAYER_TWO_BALLOON, DX::Transform2D(XMFLOAT2(-20.0f, -14.0f), 0.0f, XMFLOAT2(2,4))},
+		{ SpriteDemoManager::SpriteInitialPositions::PLAYER_ONE, DX::Transform2D(XMFLOAT2(-40.0f, -35.0f), 0.0f, XMFLOAT2(2.5,4))},
 	};
 
 	SpriteDemoManager::SpriteDemoManager(const shared_ptr<DX::DeviceResources>& deviceResources, const shared_ptr<Camera>& camera, Sprite::SpriteTypeEnum type) :
@@ -156,12 +163,12 @@ namespace DirectXGame
 				if (mType == Sprite::SpriteTypeEnum::MAIN_MENU_BALLOONS && activePlayers == StateManager::ActivePlayers::PLAYER_ONE)
 				{
 					// set transform location for current sprite 
-					mSprites[mCurrentSpriteIndex]->SetTransform(mSpriteInitialPositionsLookup.at(SpriteInitialPositions::MENU_PLAYER_ONE_BALLOON));
+					//mSprites[mCurrentSpriteIndex]->SetTransform(mSpriteInitialPositionsLookup.at(SpriteInitialPositions::MENU_PLAYER_ONE_BALLOON));
 				}
 				if (mType == Sprite::SpriteTypeEnum::MAIN_MENU_BALLOONS && activePlayers == StateManager::ActivePlayers::PLAYER_ONE_AND_TWO)
 				{
 					// set transform location for current sprite 
-					mSprites[mCurrentSpriteIndex]->SetTransform(mSpriteInitialPositionsLookup.at(SpriteInitialPositions::MENU_PLAYER_TWO_BALLOON));
+					//mSprites[mCurrentSpriteIndex]->SetTransform(mSpriteInitialPositionsLookup.at(SpriteInitialPositions::MENU_PLAYER_TWO_BALLOON));
 				}
 			}
 
@@ -249,6 +256,21 @@ namespace DirectXGame
 
 		DirectX::XMMATRIX ProjectionMatrix = mCamera->ProjectionMatrix();
 		DX::Transform2D Transform = sprite.Transform();
+
+		if (mType == Sprite::SpriteTypeEnum::MAIN_MENU_BALLOONS)
+		{
+			auto instance = StateManager::GetInstance();
+			auto state = instance->getState();
+			auto activePlayer = instance->getActivePlayers();
+			if (state == StateManager::GameState::MAIN_MENU && activePlayer == StateManager::ActivePlayers::PLAYER_ONE)
+			{
+				Transform = mSpriteInitialPositionsLookup.at(SpriteInitialPositions::MENU_PLAYER_ONE_BALLOON);
+			}
+			if (state == StateManager::GameState::MAIN_MENU && activePlayer == StateManager::ActivePlayers::PLAYER_ONE_AND_TWO)
+			{
+				Transform = mSpriteInitialPositionsLookup.at(SpriteInitialPositions::MENU_PLAYER_TWO_BALLOON);
+			}
+		}
 
 		if (mType == Sprite::SpriteTypeEnum::PLAYER_ONE)
 		{
