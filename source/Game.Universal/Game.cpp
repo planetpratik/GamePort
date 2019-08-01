@@ -163,7 +163,16 @@ namespace DirectXGame
 				it = std::find(mComponents.begin(), mComponents.end(), mMainMenuBalloons);
 				mComponents.erase(it);
 				mComponents.push_back(mLevelScreen);
+				mComponents.push_back(mEnemyOne);
+				mComponents.push_back(mEnemyTwo);
+				mComponents.push_back(mEnemyThree);
 				mComponents.push_back(mPlayerOne);
+				mEnemyOne->CreateDeviceDependentResources();
+				mEnemyOne->CreateWindowSizeDependentResources();
+				mEnemyTwo->CreateDeviceDependentResources();
+				mEnemyTwo->CreateWindowSizeDependentResources();
+				mEnemyThree->CreateDeviceDependentResources();
+				mEnemyThree->CreateWindowSizeDependentResources();
 				mPlayerOne->CreateDeviceDependentResources();
 				mPlayerOne->CreateWindowSizeDependentResources();
 				mLevelScreen->CreateDeviceDependentResources();
@@ -337,6 +346,9 @@ namespace DirectXGame
 
 		mPlayerOne = make_shared<SpriteDemoManager>(mDeviceResources, mCamera, Sprite::SpriteTypeEnum::PLAYER_ONE);
 		mLevelScreen = make_shared<SpriteDemoManager>(mDeviceResources, mCamera, Sprite::SpriteTypeEnum::LEVEL_SCREEN);
+		mEnemyOne = make_shared<SpriteDemoManager>(mDeviceResources, mCamera, Sprite::SpriteTypeEnum::ENEMY_ONE);
+		mEnemyTwo = make_shared<SpriteDemoManager>(mDeviceResources, mCamera, Sprite::SpriteTypeEnum::ENEMY_TWO);
+		mEnemyThree = make_shared<SpriteDemoManager>(mDeviceResources, mCamera, Sprite::SpriteTypeEnum::ENEMY_THREE);
 	}
 #pragma endregion
 }

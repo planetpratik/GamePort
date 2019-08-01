@@ -58,6 +58,9 @@
     <Image Include="Content\Textures\Player_One.png">
       <Filter>Content\Textures</Filter>
     </Image>
+    <Image Include="Content\Textures\Enemy.png">
+      <Filter>Content\Textures</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest" />

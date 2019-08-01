@@ -5,6 +5,7 @@
 #include "Utility.h"
 #include "Camera.h"
 #include "KeyboardComponent.h"
+#include "Random.h"
 
 using namespace std;
 using namespace gsl;
@@ -18,7 +19,10 @@ namespace DirectXGame
 		{ Sprite::SpriteTypeEnum::MAIN_MENU_SCREEN, {1u, 1u, {0.0, 0.0}, {50, 50}, {1.0f, 1.0f}, L"Content\\Textures\\StartScreen.png"}},
 		{ Sprite::SpriteTypeEnum::MAIN_MENU_BALLOONS, {1u, 4u, {-20.0f, -10.0f}, {2, 4}, {1.0f / 4, 1.0f}, L"Content\\Textures\\StartScreenBalloons.png"}},
 		{ Sprite::SpriteTypeEnum::LEVEL_SCREEN, {1u, 1u, {0.0, 0.0}, {50, 50}, {1.0f, 1.0f}, L"Content\\Textures\\Level.png"}},
-		{ Sprite::SpriteTypeEnum::PLAYER_ONE, {7u, 10u, {-40.0, -35.0}, {2.5, 4}, {1.0f / 9, 1.0f}, L"Content\\Textures\\Player_One.png"}},
+		{ Sprite::SpriteTypeEnum::PLAYER_ONE, {/*7*/1u, 10u, {-40.0, -35.0}, {2.5, 4}, {1.0f / 9, 1.0f}, L"Content\\Textures\\Player_One.png"}},
+		{ Sprite::SpriteTypeEnum::ENEMY_ONE, {1u, 10u, {-15.0, 6.0}, {4, 4}, {1.0f / 9, 1.0f}, L"Content\\Textures\\Enemy.png"}},
+		{ Sprite::SpriteTypeEnum::ENEMY_TWO, {1u, 10u, {0.0, 6.0}, {4, 4}, {1.0f / 9, 1.0f}, L"Content\\Textures\\Enemy.png"}},
+		{ Sprite::SpriteTypeEnum::ENEMY_THREE, {1u, 10u, {15.0, 6.0}, {4, 4}, {1.0f / 9, 1.0f}, L"Content\\Textures\\Enemy.png"}},
 	};
 
 	const std::unordered_map<SpriteDemoManager::SpriteInitialPositions, DX::Transform2D> SpriteDemoManager::mSpriteInitialPositionsLookup =
@@ -36,6 +40,10 @@ namespace DirectXGame
 		mPosition = mSpriteRowColumnLookupValuesByType.at(type).Position;
 		SpriteSheetName = mSpriteRowColumnLookupValuesByType.at(type).SpriteSheetName;
 		mPlayerMoveDirection = PlayerMoveDirection::RIGHT;
+		/*if (mType == Sprite::SpriteTypeEnum::ENEMY_ONE || mType == Sprite::SpriteTypeEnum::ENEMY_TWO || mType == Sprite::SpriteTypeEnum::ENEMY_THREE)
+		{
+			mPlayerState = PlayerState::FLYING;
+		}*/
 		mPlayerState = PlayerState::STANDING;
 		PlayerPos = mSpriteRowColumnLookupValuesByType.at(type).Position;
 	}
@@ -134,7 +142,7 @@ namespace DirectXGame
 				// Whenever player walks beyond platform, make him fall
 				if (PlayerPosY >= 0 && PlayerPosY <= 6)
 				{
-					if ((PlayerPosX >= 25 || PlayerPosX <= -25 ) && mPlayerState == PlayerState::STANDING)
+					if ((PlayerPosX >= 25 || PlayerPosX <= -25) && mPlayerState == PlayerState::STANDING)
 					{
 						mPlayerState = PlayerState::FALLING;
 					}
@@ -152,7 +160,7 @@ namespace DirectXGame
 				// If player is alive, then only update position,
 				if (isJumpForceAllowed)
 				{
-					mJumpAmount += movement * static_cast<float>(JumpForce)/40;
+					mJumpAmount += movement * static_cast<float>(JumpForce) / 40;
 					mCurrentSpriteIndex = 1;
 					mPlayerState = PlayerState::FLYING;
 					isJumpForceAllowed = false;
@@ -164,7 +172,7 @@ namespace DirectXGame
 					mPlayerMovement.y = 79;
 				}
 				// check if players top touching bottom of middle platform. if yes, then block
-				if (PlayerPosY >= -4.5f && PlayerPosY <-1.0f)
+				if (PlayerPosY >= -4.5f && PlayerPosY < -1.0f)
 				{
 					(void)0;
 					if (PlayerPosX > -25.0f && PlayerPosX < 25.0f)
@@ -186,7 +194,7 @@ namespace DirectXGame
 		auto instance = StateManager::GetInstance();
 		auto state = instance->getState();
 		CalculateCurrentPosition();
-		
+
 		if (state == StateManager::GameState::GAME_STARTED && mPlayerState != PlayerState::DEAD)
 		{
 			if (mType == Sprite::SpriteTypeEnum::PLAYER_ONE && mPlayerState == PlayerState::FLYING)
@@ -241,6 +249,27 @@ namespace DirectXGame
 			{
 
 			}
+			if (mType == Sprite::SpriteTypeEnum::ENEMY_ONE)
+			{
+				if (mPlayerState == PlayerState::FLYING)
+				{
+					UpdateEnemyMovements();
+				}
+			}
+			if (mType == Sprite::SpriteTypeEnum::ENEMY_TWO)
+			{
+				if (mPlayerState == PlayerState::FLYING)
+				{
+					UpdateEnemyMovements();
+				}
+			}
+			if (mType == Sprite::SpriteTypeEnum::ENEMY_THREE)
+			{
+				if (mPlayerState == PlayerState::FLYING)
+				{
+					UpdateEnemyMovements();
+				}
+			}
 		}
 
 		// Update Sprites only if sprite animation time has been elapsed. 
@@ -285,6 +314,72 @@ namespace DirectXGame
 				if (mType == Sprite::SpriteTypeEnum::PLAYER_ONE && mPlayerState == PlayerState::FALLING)
 				{
 					mCurrentSpriteIndex = 3;
+				}
+				if (mType == Sprite::SpriteTypeEnum::ENEMY_ONE && mPlayerState == PlayerState::STANDING)
+				{
+					if (mCurrentSpriteIndex < 2)
+					{
+						++mCurrentSpriteIndex;
+					}
+					else
+					{
+						mPlayerState = PlayerState::FLYING;
+					}
+				}
+				if (mType == Sprite::SpriteTypeEnum::ENEMY_TWO && mPlayerState == PlayerState::STANDING)
+				{
+					if (mCurrentSpriteIndex < 2)
+					{
+						++mCurrentSpriteIndex;
+					}
+					else
+					{
+						mPlayerState = PlayerState::FLYING;
+					}
+				}
+				if (mType == Sprite::SpriteTypeEnum::ENEMY_THREE && mPlayerState == PlayerState::STANDING)
+				{
+					if (mCurrentSpriteIndex < 2)
+					{
+						++mCurrentSpriteIndex;
+					}
+					else
+					{
+						mPlayerState = PlayerState::FLYING;
+					}
+				}
+				if (mType == Sprite::SpriteTypeEnum::ENEMY_ONE && mPlayerState == PlayerState::FLYING)
+				{
+					if (mCurrentSpriteIndex < 5)
+					{
+						++mCurrentSpriteIndex;
+					}
+					else
+					{
+						mCurrentSpriteIndex = 3;
+					}
+				}
+				if (mType == Sprite::SpriteTypeEnum::ENEMY_TWO && mPlayerState == PlayerState::FLYING)
+				{
+					if (mCurrentSpriteIndex < 5)
+					{
+						++mCurrentSpriteIndex;
+					}
+					else
+					{
+						mCurrentSpriteIndex = 3;
+					}
+				}
+				if (mType == Sprite::SpriteTypeEnum::ENEMY_THREE && mPlayerState == PlayerState::FLYING)
+				{
+					if (mCurrentSpriteIndex < 5)
+					{
+						++mCurrentSpriteIndex;
+					}
+					else
+					{
+						mCurrentSpriteIndex = 3;
+					}
 				}
 			}
 		}
@@ -345,6 +440,60 @@ namespace DirectXGame
 		}
 
 		if (mType == Sprite::SpriteTypeEnum::PLAYER_ONE)
+		{
+			if (mPlayerMoveDirection == PlayerMoveDirection::RIGHT)
+			{
+				ProjectionMatrix = XMMatrixMultiply(ProjectionMatrix, XMMatrixScaling(-1, 1, 1));
+				auto position = Transform.Position();
+				Transform.SetPosition(-position.x - mPlayerMovement.x, position.y + mPlayerMovement.y);
+				Transform.SetRotation(0.0f);
+				Transform.SetScale(SpriteScale);
+			}
+			if (mPlayerMoveDirection == PlayerMoveDirection::LEFT)
+			{
+				auto position = Transform.Position();
+				Transform.SetPosition(position.x + mPlayerMovement.x, position.y + mPlayerMovement.y);
+				Transform.SetRotation(0.0f);
+				Transform.SetScale(SpriteScale);
+			}
+		}
+		if (mType == Sprite::SpriteTypeEnum::ENEMY_ONE)
+		{
+			if (mPlayerMoveDirection == PlayerMoveDirection::RIGHT)
+			{
+				ProjectionMatrix = XMMatrixMultiply(ProjectionMatrix, XMMatrixScaling(-1, 1, 1));
+				auto position = Transform.Position();
+				Transform.SetPosition(-position.x - mPlayerMovement.x, position.y + mPlayerMovement.y);
+				Transform.SetRotation(0.0f);
+				Transform.SetScale(SpriteScale);
+			}
+			if (mPlayerMoveDirection == PlayerMoveDirection::LEFT)
+			{
+				auto position = Transform.Position();
+				Transform.SetPosition(position.x + mPlayerMovement.x, position.y + mPlayerMovement.y);
+				Transform.SetRotation(0.0f);
+				Transform.SetScale(SpriteScale);
+			}
+		}
+		if (mType == Sprite::SpriteTypeEnum::ENEMY_TWO)
+		{
+			if (mPlayerMoveDirection == PlayerMoveDirection::RIGHT)
+			{
+				ProjectionMatrix = XMMatrixMultiply(ProjectionMatrix, XMMatrixScaling(-1, 1, 1));
+				auto position = Transform.Position();
+				Transform.SetPosition(-position.x - mPlayerMovement.x, position.y + mPlayerMovement.y);
+				Transform.SetRotation(0.0f);
+				Transform.SetScale(SpriteScale);
+			}
+			if (mPlayerMoveDirection == PlayerMoveDirection::LEFT)
+			{
+				auto position = Transform.Position();
+				Transform.SetPosition(position.x + mPlayerMovement.x, position.y + mPlayerMovement.y);
+				Transform.SetRotation(0.0f);
+				Transform.SetScale(SpriteScale);
+			}
+		}
+		if (mType == Sprite::SpriteTypeEnum::ENEMY_THREE)
 		{
 			if (mPlayerMoveDirection == PlayerMoveDirection::RIGHT)
 			{
@@ -432,7 +581,7 @@ namespace DirectXGame
 		}
 		(void)0;
 	}
-	
+
 	void SpriteDemoManager::CalculateCurrentPosition()
 	{
 		switch (mType)
@@ -447,6 +596,121 @@ namespace DirectXGame
 			break;
 		default:
 			break;
+		}
+	}
+	void SpriteDemoManager::UpdateEnemyMovements()
+	{
+		UpdateEnemyXMovement();
+		UpdateEnemyYMovement();
+	}
+	void SpriteDemoManager::UpdateEnemyXMovement()
+	{
+		if (EnemyMoveForceX < 1 && EnemyMoveForceX > -1 || EnemyMoveForceX > 15 || EnemyMoveForceX < -15)
+		{
+			Random r;
+			switch (r.getRangedRandom(0, 5))
+			{
+			case 0:
+				EnemyMoveForceX = -5;
+				break;
+			case 1:
+				EnemyMoveForceX = 2;
+				break;
+			case 2:
+				EnemyMoveForceX = -3;
+				break;
+			case 3:
+				EnemyMoveForceX = 5;
+				break;
+			case 4:
+				EnemyMoveForceX = -4;
+				break;
+			case 5:
+				EnemyMoveForceX = 5;
+				break;
+			}
+		}
+
+		if (mPlayerState == PlayerState::FLYING)
+		{
+			// Simply flip Sprite based on current orientation
+			if (mPlayerMoveDirection == PlayerMoveDirection::LEFT && EnemyMoveForceX > 0)
+			{
+				mPlayerMoveDirection = PlayerMoveDirection::RIGHT;
+			}
+			if (mPlayerMoveDirection == PlayerMoveDirection::RIGHT && EnemyMoveForceX < 0)
+			{
+				mPlayerMoveDirection = PlayerMoveDirection::LEFT;
+			}
+		}
+		if (mPlayerState != PlayerState::DEAD)
+		{
+			mPlayerMovement.x += (float)EnemyMoveForceX/100;
+			EnemyMoveForceX -= 0.05;
+
+			// If an Enemy goes out of screen, make him appear entering from other side.
+			if (PlayerPosX > 45)
+			{
+				PlayerPosX = -44;
+				mPlayerMovement.x = PlayerPosX - mPosition.x;
+			}
+			if (PlayerPosX < -45)
+			{
+				PlayerPosX = 44;
+				mPlayerMovement.x = PlayerPosX - mPosition.x;
+			}
+		}
+	}
+
+	void SpriteDemoManager::UpdateEnemyYMovement()
+	{
+		if ((EnemyMoveForceY < 1 && EnemyMoveForceY > -1) || EnemyMoveForceY > 5 || EnemyMoveForceY < -5)
+		{
+			Random r;
+			switch (r.getRangedRandom(0, 5))
+			{
+			case 0:
+				EnemyMoveForceY = 1;
+				break;
+			case 1:
+				EnemyMoveForceY = -2;
+				break;
+			case 2:
+				EnemyMoveForceY = 4;
+				break;
+			case 3:
+				EnemyMoveForceY = -5;
+				break;
+			case 4:
+				EnemyMoveForceY = 5;
+				break;
+			case 5:
+				EnemyMoveForceY = -2;
+				break;
+			}
+		}
+
+		if (mPlayerState != PlayerState::DEAD)
+		{
+			mPlayerMovement.y += (float)EnemyMoveForceY / 100;
+			EnemyMoveForceY -= 0.05;
+
+			// Don't let enemies go inside water unless they are dead.
+			if (PlayerPosY < -37)
+			{
+				PlayerPosY = -36;
+				mPlayerMovement.y += 1;
+				EnemyMoveForceY = 80;
+			}
+
+			// Also make sure that enemies don't go out of top-bound.
+			// make top bound for enemies smaller than players so player can have advantage going over top.
+			if (PlayerPosY > 40)
+			{
+				PlayerPosY = 39;
+				mPlayerMovement.y -= 1;
+				EnemyMoveForceY = -5;
+			}
 		}
 	}
 }

@@ -35,9 +35,11 @@ namespace DirectXGame
 		DirectX::XMFLOAT2 UVScalingFactor{ DirectX::XMFLOAT2(1.0f / 4,1.0f) };
 		std::wstring SpriteSheetName;
 		double AnimationUpdateDelay{ 0.2 }; // Delay between Animation changes, in seconds
-		double DataUpdateDelay{ 0.5 }; // Delay between Animation changes, in seconds
+		double DataUpdateDelay{ 0.5 }; // Delay between Data changes, in seconds
 		double Force{ 2.0 };
 		double JumpForce{ 200.0 };
+		double EnemyMoveForceX{ 0.0 };
+		double EnemyMoveForceY{ 0.0 };
 
 	private:
 		struct VSCBufferPerObject
@@ -151,5 +153,8 @@ namespace DirectXGame
 		void DrawSprite(Sprite& sprite);
 		void InitializeSprites(Sprite::SpriteTypeEnum type, std::vector<std::shared_ptr<Sprite>>& mSprites);
 		void CalculateCurrentPosition();
+		void UpdateEnemyMovements();
+		void UpdateEnemyXMovement();
+		void UpdateEnemyYMovement();
 	};
 }
