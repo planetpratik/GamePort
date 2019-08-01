@@ -102,6 +102,9 @@ namespace DirectXGame
 	{
 		if (player == Sprite::SpriteTypeEnum::PLAYER_ONE)
 		{
+			auto PlayerPos = mSpriteRowColumnLookupValuesByType.at(mType).Position;
+			auto PlayerPosX = PlayerPos.x + mPlayerOneMovement.x;
+			auto PlayerPosY = PlayerPos.y + mPlayerOneMovement.y;
 			if (mPlayerState == PlayerState::STANDING || mPlayerState == PlayerState::FLYING || mPlayerState == PlayerState::FALLING)
 			{
 				// Simply flip Sprite based on current orientation
@@ -130,6 +133,14 @@ namespace DirectXGame
 				{
 					mPlayerOneMovement.x = 88;
 				}
+				// Whenever player walks beyond platform, make him fall
+				if (PlayerPosY >= 0 && PlayerPosY <= 6)
+				{
+					if ((PlayerPosX >= 25 || PlayerPosX <= -25 ) && mPlayerState == PlayerState::STANDING)
+					{
+						mPlayerState = PlayerState::FALLING;
+					}
+				}
 			}
 		}
 	}
@@ -138,9 +149,12 @@ namespace DirectXGame
 	{
 		if (player == Sprite::SpriteTypeEnum::PLAYER_ONE)
 		{
+			auto PlayerPos = mSpriteRowColumnLookupValuesByType.at(mType).Position;
+			auto PlayerPosX = PlayerPos.x + mPlayerOneMovement.x;
+			auto PlayerPosY = PlayerPos.y + mPlayerOneMovement.y;
 			if (mPlayerState != PlayerState::DEAD)
 			{
-				// If player is alive then only update position,
+				// If player is alive, then only update position,
 				if (isJumpForceAllowed)
 				{
 					mJumpAmount += movement * static_cast<float>(JumpForce)/40;
@@ -154,6 +168,19 @@ namespace DirectXGame
 				{
 					mPlayerOneMovement.y = 79;
 				}
+				// check if players top touching bottom of middle platform. if yes, then block
+				if (PlayerPosY >= -4.5f && PlayerPosY <-1.0f)
+				{
+					(void)0;
+					if (PlayerPosX > -25.0f && PlayerPosX < 25.0f)
+					{
+						mJumpAmount = 0;
+						isJumpForceAllowed = true;
+						mPlayerOneMovement.y -= 1;
+						PlayerPosY -= 1;
+						mPlayerState = PlayerState::FALLING;
+					}
+				}
 			}
 		}
 	}
@@ -163,28 +190,20 @@ namespace DirectXGame
 		// For every update, do change movement. Note that movement update and animation update are different.
 		auto instance = StateManager::GetInstance();
 		auto state = instance->getState();
-		auto PlayerPos = mSpriteRowColumnLookupValuesByType.at(mType).Position;
-		auto PlayerPosX = PlayerPos.x - mPlayerOneMovement.x;
-		auto PlayerPosY = PlayerPos.y - mPlayerOneMovement.y;
+		
 		if (state == StateManager::GameState::GAME_STARTED && mPlayerState != PlayerState::DEAD)
 		{
+			auto PlayerPos = mSpriteRowColumnLookupValuesByType.at(mType).Position;
+			auto PlayerPosX = PlayerPos.x + mPlayerOneMovement.x;
+			auto PlayerPosY = PlayerPos.y + mPlayerOneMovement.y;
 			if (mType == Sprite::SpriteTypeEnum::PLAYER_ONE && mPlayerState == PlayerState::FLYING)
 			{
-				// First check if players top touching bottom of middle platform. if yes, then block
-				if (PlayerPosY == -4.5f)
-				{
-					(void)0;
-					if (PlayerPosX > -25.0f && PlayerPosX < 25.0f)
-					{
-						mPlayerOneMovement.y = -5.0f;
-					}
-				}
 				if (mJumpAmount > 0)
 				{
 					mPlayerOneMovement.y += 0.25;
 					mJumpAmount -= 0.05;
 				}
-				else
+				if (mJumpAmount <= 0)
 				{
 					mPlayerState = PlayerState::FALLING;
 				}
@@ -192,7 +211,28 @@ namespace DirectXGame
 			else if (mType == Sprite::SpriteTypeEnum::PLAYER_ONE && mPlayerState == PlayerState::FALLING)
 			{
 				// If player is landing on ground, don't let him fall through.
-
+				if (PlayerPosY < -35.0f)
+				{
+					if ((PlayerPosX > -45.0f && PlayerPosX < -30.0f) || (PlayerPosX > 30.0f && PlayerPosX < 45.0f))
+					{
+						mJumpAmount = 0;
+						isJumpForceAllowed = true;
+						mPlayerOneMovement.y += 1;
+						PlayerPosY = -35.0;
+						mPlayerState = PlayerState::STANDING;
+					}
+				}
+				if (PlayerPosY <= 5 && PlayerPosY > 0.0)
+				{
+					if (PlayerPosX > -25.0f && PlayerPosX < 25.0f)
+					{
+						mJumpAmount = 0;
+						isJumpForceAllowed = true;
+						mPlayerOneMovement.y += 1;
+						PlayerPosY = 0.0;
+						mPlayerState = PlayerState::STANDING;
+					}
+				}
 
 				// Player Goes below screen but stays there ( not visible )
 				if (mPlayerOneMovement.y < -20)
@@ -244,6 +284,14 @@ namespace DirectXGame
 						isJumpForceAllowed = true;
 						mJumpAmount = 0;
 					}
+				}
+				if (mType == Sprite::SpriteTypeEnum::PLAYER_ONE && mPlayerState == PlayerState::STANDING)
+				{
+					mCurrentSpriteIndex = 0;
+				}
+				if (mType == Sprite::SpriteTypeEnum::PLAYER_ONE && mPlayerState == PlayerState::FALLING)
+				{
+					mCurrentSpriteIndex = 3;
 				}
 			}
 		}
