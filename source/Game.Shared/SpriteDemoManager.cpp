@@ -103,8 +103,6 @@ namespace DirectXGame
 	{
 		if (player == Sprite::SpriteTypeEnum::PLAYER_ONE)
 		{
-			auto PlayerPosX = PlayerPos.x + mPlayerMovement.x;
-			auto PlayerPosY = PlayerPos.y + mPlayerMovement.y;
 			if (mPlayerState == PlayerState::STANDING || mPlayerState == PlayerState::FLYING || mPlayerState == PlayerState::FALLING)
 			{
 				// Simply flip Sprite based on current orientation
@@ -149,8 +147,6 @@ namespace DirectXGame
 	{
 		if (player == Sprite::SpriteTypeEnum::PLAYER_ONE)
 		{
-			auto PlayerPosX = PlayerPos.x + mPlayerMovement.x;
-			auto PlayerPosY = PlayerPos.y + mPlayerMovement.y;
 			if (mPlayerState != PlayerState::DEAD)
 			{
 				// If player is alive, then only update position,
@@ -189,11 +185,10 @@ namespace DirectXGame
 		// For every update, do change movement. Note that movement update and animation update are different.
 		auto instance = StateManager::GetInstance();
 		auto state = instance->getState();
+		CalculateCurrentPosition();
 		
 		if (state == StateManager::GameState::GAME_STARTED && mPlayerState != PlayerState::DEAD)
 		{
-			auto PlayerPosX = PlayerPos.x + mPlayerMovement.x;
-			auto PlayerPosY = PlayerPos.y + mPlayerMovement.y;
 			if (mType == Sprite::SpriteTypeEnum::PLAYER_ONE && mPlayerState == PlayerState::FLYING)
 			{
 				if (mJumpAmount > 0)
@@ -436,5 +431,22 @@ namespace DirectXGame
 			}
 		}
 		(void)0;
+	}
+	
+	void SpriteDemoManager::CalculateCurrentPosition()
+	{
+		switch (mType)
+		{
+		case Sprite::SpriteTypeEnum::PLAYER_ONE:
+		case Sprite::SpriteTypeEnum::PLAYER_TWO:
+		case Sprite::SpriteTypeEnum::ENEMY_ONE:
+		case Sprite::SpriteTypeEnum::ENEMY_TWO:
+		case Sprite::SpriteTypeEnum::ENEMY_THREE:
+			PlayerPosX = PlayerPos.x + mPlayerMovement.x;
+			PlayerPosY = PlayerPos.y + mPlayerMovement.y;
+			break;
+		default:
+			break;
+		}
 	}
 }

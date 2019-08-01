@@ -119,6 +119,8 @@ namespace DirectXGame
 		};
 
 		DirectX::XMFLOAT2 PlayerPos = { 0.0f, 0.0f };
+		float PlayerPosX = 0.0f;
+		float PlayerPosY = 0.0f;
 		inline static const int MAIN_MENU_BACKGROUND_IMAGE_INDEX = 0;
 		static const std::unordered_map<Sprite::SpriteTypeEnum, RowColumnLookupInfo> mSpriteRowColumnLookupValuesByType;
 		static const std::unordered_map<SpriteInitialPositions, DX::Transform2D> mSpriteInitialPositionsLookup;
@@ -148,5 +150,6 @@ namespace DirectXGame
 		
 		void DrawSprite(Sprite& sprite);
 		void InitializeSprites(Sprite::SpriteTypeEnum type, std::vector<std::shared_ptr<Sprite>>& mSprites);
+		void CalculateCurrentPosition();
 	};
 }
