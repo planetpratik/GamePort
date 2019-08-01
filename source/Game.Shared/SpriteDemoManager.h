@@ -118,7 +118,7 @@ namespace DirectXGame
 			DEAD
 		};
 
-		inline static const DirectX::XMFLOAT2 BackgroundImageScale{ DirectX::XMFLOAT2(50.0f, 50.0f) };
+		DirectX::XMFLOAT2 PlayerPos = { 0.0f, 0.0f };
 		inline static const int MAIN_MENU_BACKGROUND_IMAGE_INDEX = 0;
 		static const std::unordered_map<Sprite::SpriteTypeEnum, RowColumnLookupInfo> mSpriteRowColumnLookupValuesByType;
 		static const std::unordered_map<SpriteInitialPositions, DX::Transform2D> mSpriteInitialPositionsLookup;
@@ -144,9 +144,8 @@ namespace DirectXGame
 		bool isJumpForceAllowed = true;
 		float mJumpAmount = 0;
 
-		DirectX::XMFLOAT2 mPlayerOneMovement = {0.0f, 0.0f};
-
-
+		DirectX::XMFLOAT2 mPlayerMovement = {0.0f, 0.0f};
+		
 		void DrawSprite(Sprite& sprite);
 		void InitializeSprites(Sprite::SpriteTypeEnum type, std::vector<std::shared_ptr<Sprite>>& mSprites);
 	};
