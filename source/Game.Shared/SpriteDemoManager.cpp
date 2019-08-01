@@ -16,17 +16,10 @@ namespace DirectXGame
 	const std::unordered_map<Sprite::SpriteTypeEnum, SpriteDemoManager::RowColumnLookupInfo> SpriteDemoManager::mSpriteRowColumnLookupValuesByType =
 	{
 		{ Sprite::SpriteTypeEnum::MAIN_MENU_SCREEN, {1u, 1u, {0.0, 0.0}, {50, 50}, {1.0f, 1.0f}, L"Content\\Textures\\StartScreen.png"}},
-		{ Sprite::SpriteTypeEnum::MAIN_MENU_BALLOONS, {1u, 4u, {-20.0f, -10.0f}, {2, 4}, {1.0f/4, 1.0f}, L"Content\\Textures\\StartScreenBalloons.png"}},
+		{ Sprite::SpriteTypeEnum::MAIN_MENU_BALLOONS, {1u, 4u, {-20.0f, -10.0f}, {2, 4}, {1.0f / 4, 1.0f}, L"Content\\Textures\\StartScreenBalloons.png"}},
 		{ Sprite::SpriteTypeEnum::LEVEL_SCREEN, {1u, 1u, {0.0, 0.0}, {50, 50}, {1.0f, 1.0f}, L"Content\\Textures\\Level.png"}},
-		{ Sprite::SpriteTypeEnum::PLAYER_ONE, {7u, 10u, {-40.0, -35.0}, {2.5, 4}, {1.0f/9, 1.0f}, L"Content\\Textures\\Player_One.png"}},
+		{ Sprite::SpriteTypeEnum::PLAYER_ONE, {7u, 10u, {-40.0, -35.0}, {2.5, 4}, {1.0f / 9, 1.0f}, L"Content\\Textures\\Player_One.png"}},
 	};
-
-	/*const std::unordered_map<SpriteDemoManager::SpriteInitialPositions, DirectX::XMFLOAT2> SpriteDemoManager::mSpriteInitialPositionsLookup =
-	{
-		{ SpriteDemoManager::SpriteInitialPositions::MENU_PLAYER_ONE_BALLOON, DirectX::XMFLOAT2(-20.0f, -10.0f)},
-		{ SpriteDemoManager::SpriteInitialPositions::MENU_PLAYER_TWO_BALLOON, DirectX::XMFLOAT2(0.0f, 0.0f)},
-		{ SpriteDemoManager::SpriteInitialPositions::PLAYER_ONE, DirectX::XMFLOAT2(-40.0f, -35.0f)},
-	};*/
 
 	const std::unordered_map<SpriteDemoManager::SpriteInitialPositions, DX::Transform2D> SpriteDemoManager::mSpriteInitialPositionsLookup =
 	{
@@ -73,13 +66,13 @@ namespace DirectXGame
 
 		const CD3D11_DEFAULT defaultDesc;
 		const CD3D11_SAMPLER_DESC samplerStateDesc(defaultDesc);
-		mTextureSampler = nullptr;		
+		mTextureSampler = nullptr;
 		ThrowIfFailed(mDeviceResources->GetD3DDevice()->CreateSamplerState(&samplerStateDesc, mTextureSampler.put()));
 
 		CD3D11_BLEND_DESC blendStateDesc(defaultDesc);
 		blendStateDesc.RenderTarget[0].BlendEnable = true;
 		blendStateDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
-		blendStateDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;		
+		blendStateDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
 		mAlphaBlending = nullptr;
 		ThrowIfFailed(mDeviceResources->GetD3DDevice()->CreateBlendState(&blendStateDesc, mAlphaBlending.put()));
 
@@ -107,9 +100,9 @@ namespace DirectXGame
 
 	void SpriteDemoManager::SetPlayerXMovement(Sprite::SpriteTypeEnum player, float movement)
 	{
-		if (player == Sprite::SpriteTypeEnum::PLAYER_ONE )
+		if (player == Sprite::SpriteTypeEnum::PLAYER_ONE)
 		{
-			if (mPlayerState == PlayerState::STANDING || mPlayerState == PlayerState::FLYING)
+			if (mPlayerState == PlayerState::STANDING || mPlayerState == PlayerState::FLYING || mPlayerState == PlayerState::FALLING)
 			{
 				// Simply flip Sprite based on current orientation
 				if (mPlayerMoveDirection == PlayerMoveDirection::LEFT && movement > 0)
@@ -122,10 +115,10 @@ namespace DirectXGame
 					mPlayerMoveDirection = PlayerMoveDirection::LEFT;
 				}
 			}
-			if(mPlayerState != PlayerState::DEAD)
+			if (mPlayerState != PlayerState::DEAD)
 			{
 				// If player is alive then only update position,
-				mPlayerOneMovement.x += movement / 15;
+				mPlayerOneMovement.x += movement / 8;
 
 				// If player goes out of screen, make him appear entering from other side.
 
@@ -145,52 +138,82 @@ namespace DirectXGame
 	{
 		if (player == Sprite::SpriteTypeEnum::PLAYER_ONE)
 		{
-			movement;
-		}
-	}
-
-	void SpriteDemoManager::UpdateData(const StepTimer& timer, StateManager::ActivePlayers activePlayers, DX::KeyboardComponent mKeyboard)
-	{
-		if (timer.GetTotalSeconds() > mLastDataUpdateTime + DataUpdateDelay)
-		{
-			mLastDataUpdateTime = timer.GetTotalSeconds();
-			auto instance = StateManager::GetInstance();
-			auto state = instance->getState();
-			//auto activePlayer = instance->getActivePlayers();
-			// If currently in the Main Menu
-			if (state == StateManager::GameState::MAIN_MENU)
+			if (mPlayerState != PlayerState::DEAD)
 			{
-				if (mType == Sprite::SpriteTypeEnum::MAIN_MENU_BALLOONS && activePlayers == StateManager::ActivePlayers::PLAYER_ONE)
+				// If player is alive then only update position,
+				if (isJumpForceAllowed)
 				{
-					// set transform location for current sprite 
-					//mSprites[mCurrentSpriteIndex]->SetTransform(mSpriteInitialPositionsLookup.at(SpriteInitialPositions::MENU_PLAYER_ONE_BALLOON));
+					mJumpAmount += movement * static_cast<float>(JumpForce)/40;
+					mCurrentSpriteIndex = 1;
+					mPlayerState = PlayerState::FLYING;
+					isJumpForceAllowed = false;
 				}
-				if (mType == Sprite::SpriteTypeEnum::MAIN_MENU_BALLOONS && activePlayers == StateManager::ActivePlayers::PLAYER_ONE_AND_TWO)
+
+				// Don't let player go out of upper y-bounds.
+				if (mPlayerOneMovement.y > 80)
 				{
-					// set transform location for current sprite 
-					//mSprites[mCurrentSpriteIndex]->SetTransform(mSpriteInitialPositionsLookup.at(SpriteInitialPositions::MENU_PLAYER_TWO_BALLOON));
+					mPlayerOneMovement.y = 79;
 				}
-			}
-
-			// If Player(s) is/are in the game.
-			if (state == StateManager::GameState::GAME_STARTED)
-			{
-				
-			}
-			if (mType == Sprite::SpriteTypeEnum::PLAYER_ONE && activePlayers == StateManager::ActivePlayers::PLAYER_ONE)
-			{
-
 			}
 		}
 	}
 
 	void SpriteDemoManager::Update(const StepTimer& timer)
 	{
+		// For every update, do change movement. Note that movement update and animation update are different.
+		auto instance = StateManager::GetInstance();
+		auto state = instance->getState();
+		auto PlayerPos = mSpriteRowColumnLookupValuesByType.at(mType).Position;
+		auto PlayerPosX = PlayerPos.x - mPlayerOneMovement.x;
+		auto PlayerPosY = PlayerPos.y - mPlayerOneMovement.y;
+		if (state == StateManager::GameState::GAME_STARTED && mPlayerState != PlayerState::DEAD)
+		{
+			if (mType == Sprite::SpriteTypeEnum::PLAYER_ONE && mPlayerState == PlayerState::FLYING)
+			{
+				// First check if players top touching bottom of middle platform. if yes, then block
+				if (PlayerPosY == -4.5f)
+				{
+					(void)0;
+					if (PlayerPosX > -25.0f && PlayerPosX < 25.0f)
+					{
+						mPlayerOneMovement.y = -5.0f;
+					}
+				}
+				if (mJumpAmount > 0)
+				{
+					mPlayerOneMovement.y += 0.25;
+					mJumpAmount -= 0.05;
+				}
+				else
+				{
+					mPlayerState = PlayerState::FALLING;
+				}
+			}
+			else if (mType == Sprite::SpriteTypeEnum::PLAYER_ONE && mPlayerState == PlayerState::FALLING)
+			{
+				// If player is landing on ground, don't let him fall through.
+
+
+				// Player Goes below screen but stays there ( not visible )
+				if (mPlayerOneMovement.y < -20)
+				{
+					mPlayerOneMovement.y = -19;
+				}
+				else
+				{
+					mPlayerOneMovement.y -= 0.2;
+				}
+			}
+			else if (mType == Sprite::SpriteTypeEnum::PLAYER_ONE && mPlayerState == PlayerState::STANDING)
+			{
+
+			}
+		}
+
+		// Update Sprites only if sprite animation time has been elapsed. 
 		if (timer.GetTotalSeconds() > mLastAnimationUpdateTime + AnimationUpdateDelay)
 		{
 			mLastAnimationUpdateTime = timer.GetTotalSeconds();
-			auto instance = StateManager::GetInstance();
-			auto state = instance->getState();
 			//auto activePlayer = instance->getActivePlayers();
 			// If currently in the Main Menu
 			if (state == StateManager::GameState::MAIN_MENU)
@@ -206,9 +229,22 @@ namespace DirectXGame
 			}
 
 			// If Player(s) is/are in the game.
+			// Do player & Enemy animations here.
 			if (state == StateManager::GameState::GAME_STARTED)
 			{
-				// Do player & Enemy animations here. 
+				if (mType == Sprite::SpriteTypeEnum::PLAYER_ONE && mPlayerState == PlayerState::FLYING)
+				{
+					if (mCurrentSpriteIndex < 3)
+					{
+						++mCurrentSpriteIndex;
+					}
+					else
+					{
+						mCurrentSpriteIndex = 1;
+						isJumpForceAllowed = true;
+						mJumpAmount = 0;
+					}
+				}
 			}
 		}
 	}
@@ -227,7 +263,7 @@ namespace DirectXGame
 
 		direct3DDeviceContext->VSSetShader(mVertexShader.get(), nullptr, 0);
 		direct3DDeviceContext->PSSetShader(mPixelShader.get(), nullptr, 0);
-		
+
 		winrt::impl::abi_t<ID3D11ShaderResourceView>* psShaderResources = nullptr;
 
 		psShaderResources = mSpriteSheet.get();
@@ -235,7 +271,7 @@ namespace DirectXGame
 
 		const auto vsConstantBuffers = mVSCBufferPerObject.get();
 		direct3DDeviceContext->VSSetConstantBuffers(0, 1, &vsConstantBuffers);
-		
+
 		const auto textureSamplers = mTextureSampler.get();
 		direct3DDeviceContext->PSSetSamplers(0, 1, &textureSamplers);
 		direct3DDeviceContext->OMSetBlendState(mAlphaBlending.get(), 0, 0xFFFFFFFF);
@@ -243,11 +279,6 @@ namespace DirectXGame
 		direct3DDeviceContext->PSSetShaderResources(0, 1, &psShaderResources);
 
 		DrawSprite(*mSprites[mCurrentSpriteIndex]);
-
-		/*for (const auto& sprite : mSprites)
-		{
-			DrawSprite(*sprite);
-		}*/
 	}
 
 	void SpriteDemoManager::DrawSprite(Sprite& sprite)
@@ -278,7 +309,7 @@ namespace DirectXGame
 			{
 				ProjectionMatrix = XMMatrixMultiply(ProjectionMatrix, XMMatrixScaling(-1, 1, 1));
 				auto position = Transform.Position();
-				Transform.SetPosition(-position.x - mPlayerOneMovement.x, position.y - mPlayerOneMovement.y);
+				Transform.SetPosition(-position.x - mPlayerOneMovement.x, position.y + mPlayerOneMovement.y);
 				Transform.SetRotation(0.0f);
 				Transform.SetScale(SpriteScale);
 			}
@@ -304,7 +335,7 @@ namespace DirectXGame
 
 	void SpriteDemoManager::InitializeVertices()
 	{
-		const VertexPositionTexture vertices[] = 
+		const VertexPositionTexture vertices[] =
 		{
 			VertexPositionTexture(XMFLOAT4(-1.0f, -1.0f, 0.0f, 1.0f), XMFLOAT2(0.0f, 1.0f)),
 			VertexPositionTexture(XMFLOAT4(-1.0f, 1.0f, 0.0f, 1.0f), XMFLOAT2(0.0f, 0.0f)),
@@ -313,7 +344,7 @@ namespace DirectXGame
 		};
 
 		mVertexBuffer = nullptr;
-		VertexPositionTexture::CreateVertexBuffer(not_null<ID3D11Device*>(mDeviceResources->GetD3DDevice()), vertices, not_null<ID3D11Buffer**>(mVertexBuffer.put()));
+		VertexPositionTexture::CreateVertexBuffer(not_null<ID3D11Device*>(mDeviceResources->GetD3DDevice()), vertices, not_null<ID3D11Buffer * *>(mVertexBuffer.put()));
 
 		// Create and index buffer
 		const uint16_t indices[] =
@@ -344,7 +375,7 @@ namespace DirectXGame
 			for (uint32_t row = 0; row < mSpriteRowColumnLookupValuesByType.at(type).SpriteRowCount; ++row, ++spriteIndex)
 			{
 				// Set Position of the Sprite. We can default it to zero ( Currently Calculated based on row, column & neighborOffset )
-				XMFLOAT2 position(mPosition.x,mPosition.y/*mPosition.x + column * neighborOffset.x * SpriteScale.x, mPosition.y + row * neighborOffset.y * SpriteScale.y*/);
+				XMFLOAT2 position(mPosition.x, mPosition.y/*mPosition.x + column * neighborOffset.x * SpriteScale.x, mPosition.y + row * neighborOffset.y * SpriteScale.y*/);
 				Transform2D transform(position, 0.0f, SpriteScale);
 				auto sprite = make_shared<Sprite>(spriteIndex, transform, type);
 

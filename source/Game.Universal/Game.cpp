@@ -126,22 +126,12 @@ namespace DirectXGame
 		// Update Game entities data
 		if (state == StateManager::GameState::MAIN_MENU)
 		{
-			if (activePlayers == StateManager::ActivePlayers::PLAYER_ONE)
-			{
-				// If Key not pressed, keep updating current sprite animation
-				mMainMenuBalloons->UpdateData(timer, StateManager::ActivePlayers::PLAYER_ONE, *mKeyboard);
-			}
-			if (activePlayers == StateManager::ActivePlayers::PLAYER_ONE_AND_TWO)
-			{
-				mMainMenuBalloons->UpdateData(timer, StateManager::ActivePlayers::PLAYER_ONE_AND_TWO, *mKeyboard);
-			}
 		}
 
 		if (state == StateManager::GameState::GAME_STARTED)
 		{
 			if (activePlayers == StateManager::ActivePlayers::PLAYER_ONE)
 			{
-				mPlayerOne->UpdateData(timer, StateManager::ActivePlayers::PLAYER_ONE, *mKeyboard);
 			}
 			if (activePlayers == StateManager::ActivePlayers::PLAYER_ONE_AND_TWO)
 			{

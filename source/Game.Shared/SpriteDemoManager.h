@@ -32,11 +32,12 @@ namespace DirectXGame
 
 		DirectX::XMFLOAT2 SpriteScale{ DirectX::XMFLOAT2(2.0f, 4.0f) };
 		DirectX::XMFLOAT2 mPosition{ 0.0f, 0.0f };
-		DirectX::XMFLOAT2 UVScalingFactor{ DirectX::XMFLOAT2(/*1.0f / SpriteCount, 1.0f / MoodCount*//*0.25,2*/1.0f / 4,1.0f) };
+		DirectX::XMFLOAT2 UVScalingFactor{ DirectX::XMFLOAT2(1.0f / 4,1.0f) };
 		std::wstring SpriteSheetName;
-		double AnimationUpdateDelay{ 0.5 }; // Delay between Animation changes, in seconds
+		double AnimationUpdateDelay{ 0.2 }; // Delay between Animation changes, in seconds
 		double DataUpdateDelay{ 0.5 }; // Delay between Animation changes, in seconds
 		double Force{ 2.0 };
+		double JumpForce{ 200.0 };
 
 	private:
 		struct VSCBufferPerObject
@@ -120,10 +121,8 @@ namespace DirectXGame
 		inline static const DirectX::XMFLOAT2 BackgroundImageScale{ DirectX::XMFLOAT2(50.0f, 50.0f) };
 		inline static const int MAIN_MENU_BACKGROUND_IMAGE_INDEX = 0;
 		static const std::unordered_map<Sprite::SpriteTypeEnum, RowColumnLookupInfo> mSpriteRowColumnLookupValuesByType;
-		//static const std::unordered_map<SpriteInitialPositions, DirectX::XMFLOAT2> mSpriteInitialPositionsLookup;
 		static const std::unordered_map<SpriteInitialPositions, DX::Transform2D> mSpriteInitialPositionsLookup;
 
-		void UpdateData(const DX::StepTimer& timer, StateManager::ActivePlayers activePlayers, DX::KeyboardComponent mKeyboard);
 		void SetPlayerXMovement(Sprite::SpriteTypeEnum player, float movement);
 		void SetPlayerYMovement(Sprite::SpriteTypeEnum player, float movement);
 	private:
@@ -142,6 +141,8 @@ namespace DirectXGame
 		double mLastAnimationUpdateTime;
 		double mLastDataUpdateTime;
 		uint32_t mCurrentSpriteIndex;
+		bool isJumpForceAllowed = true;
+		float mJumpAmount = 0;
 
 		DirectX::XMFLOAT2 mPlayerOneMovement = {0.0f, 0.0f};
 
