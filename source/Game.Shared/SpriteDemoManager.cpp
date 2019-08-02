@@ -789,8 +789,8 @@ namespace DirectXGame
 	}
 	void SpriteDemoManager::UpdateEnemyMovements()
 	{
-		//UpdateEnemyXMovement();
-		//UpdateEnemyYMovement();
+		UpdateEnemyXMovement();
+		UpdateEnemyYMovement();
 	}
 	void SpriteDemoManager::UpdateEnemyXMovement()
 	{
