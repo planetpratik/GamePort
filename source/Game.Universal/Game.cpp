@@ -12,6 +12,7 @@
 #include "BallManager.h"
 #include "SpriteDemoManager.h"
 #include "StateManager.h"
+#include "Sprite.h"
 
 extern void ExitGame();
 
@@ -132,9 +133,18 @@ namespace DirectXGame
 		{
 			if (activePlayers == StateManager::ActivePlayers::PLAYER_ONE)
 			{
+				CheckCollision(mPlayerOne.get(), mEnemyOne.get());
+				CheckCollision(mPlayerOne.get(), mEnemyTwo.get());
+				CheckCollision(mPlayerOne.get(), mEnemyThree.get());
 			}
 			if (activePlayers == StateManager::ActivePlayers::PLAYER_ONE_AND_TWO)
 			{
+				CheckCollision(mPlayerOne.get(), mEnemyOne.get());
+				CheckCollision(mPlayerOne.get(), mEnemyTwo.get());
+				CheckCollision(mPlayerOne.get(), mEnemyThree.get());
+				CheckCollision(mPlayerTwo.get(), mEnemyOne.get());
+				CheckCollision(mPlayerTwo.get(), mEnemyTwo.get());
+				CheckCollision(mPlayerTwo.get(), mEnemyThree.get());
 			}
 		}
 
@@ -152,48 +162,149 @@ namespace DirectXGame
 			ExitGame();
 		}
 
-		// Check inputs
+		// Check inputs Here
 
 		if (state == StateManager::GameState::MAIN_MENU)
 		{
-			if (mKeyboard->WasKeyPressedThisFrame(DX::Keys::Enter))
+			if (mKeyboard->WasKeyPressedThisFrame(DX::Keys::Enter) || mGamePad->WasButtonDown(DX::GamePadButtons::Start))
 			{
+
+				// Remove unused components before adding new components.
 				auto it = std::find(mComponents.begin(), mComponents.end(), mMainMenuScreen);
 				mComponents.erase(it);
 				it = std::find(mComponents.begin(), mComponents.end(), mMainMenuBalloons);
 				mComponents.erase(it);
-				mComponents.push_back(mLevelScreen);
-				mComponents.push_back(mEnemyOne);
-				mComponents.push_back(mEnemyTwo);
-				mComponents.push_back(mEnemyThree);
-				mComponents.push_back(mPlayerOne);
-				mEnemyOne->CreateDeviceDependentResources();
-				mEnemyOne->CreateWindowSizeDependentResources();
-				mEnemyTwo->CreateDeviceDependentResources();
-				mEnemyTwo->CreateWindowSizeDependentResources();
-				mEnemyThree->CreateDeviceDependentResources();
-				mEnemyThree->CreateWindowSizeDependentResources();
-				mPlayerOne->CreateDeviceDependentResources();
-				mPlayerOne->CreateWindowSizeDependentResources();
-				mLevelScreen->CreateDeviceDependentResources();
-				mLevelScreen->CreateWindowSizeDependentResources();
+
+				mMainMenuScreen->ReleaseDeviceDependentResources();
+				mMainMenuBalloons->ReleaseDeviceDependentResources();
+
+				if (instance->getActivePlayers() == StateManager::ActivePlayers::PLAYER_ONE)
+				{
+					mComponents.push_back(mLevelScreen);
+					mComponents.push_back(mEnemyOne);
+					mComponents.push_back(mEnemyTwo);
+					mComponents.push_back(mEnemyThree);
+					mComponents.push_back(mPlayerOne);
+
+					//TODO :- Where to dispose Previous resources when switching from level to menu or vice versa ?
+					//releaseResources(previousGameState, previousActivePlayers);
+					
+					mEnemyOne->CreateDeviceDependentResources();
+					mEnemyOne->CreateWindowSizeDependentResources();
+					mEnemyTwo->CreateDeviceDependentResources();
+					mEnemyTwo->CreateWindowSizeDependentResources();
+					mEnemyThree->CreateDeviceDependentResources();
+					mEnemyThree->CreateWindowSizeDependentResources();
+					mPlayerOne->CreateDeviceDependentResources();
+					mPlayerOne->CreateWindowSizeDependentResources();
+					mLevelScreen->CreateDeviceDependentResources();
+					mLevelScreen->CreateWindowSizeDependentResources();
+				}
+				else
+				{
+					mComponents.push_back(mLevelScreen);
+					mComponents.push_back(mEnemyOne);
+					mComponents.push_back(mEnemyTwo);
+					mComponents.push_back(mEnemyThree);
+					mComponents.push_back(mPlayerOne);
+					mComponents.push_back(mPlayerTwo);
+
+					//TODO :- Where to dispose Previous resources when switching from level to menu or vice versa ?
+					//releaseResources(previousGameState, previousActivePlayers);
+					
+					mEnemyOne->CreateDeviceDependentResources();
+					mEnemyOne->CreateWindowSizeDependentResources();
+					mEnemyTwo->CreateDeviceDependentResources();
+					mEnemyTwo->CreateWindowSizeDependentResources();
+					mEnemyThree->CreateDeviceDependentResources();
+					mEnemyThree->CreateWindowSizeDependentResources();
+					mPlayerOne->CreateDeviceDependentResources();
+					mPlayerOne->CreateWindowSizeDependentResources();
+					mPlayerTwo->CreateDeviceDependentResources();
+					mPlayerTwo->CreateWindowSizeDependentResources();
+					mLevelScreen->CreateDeviceDependentResources();
+					mLevelScreen->CreateWindowSizeDependentResources();
+				}
 				instance->setState(StateManager::GameState::GAME_STARTED);
+			}
+			if (mKeyboard->WasKeyPressedThisFrame(DX::Keys::Tab) || mGamePad->WasButtonDown(DX::GamePadButtons::LeftShoulder))
+			{
+				if (!isPlayerTwoSelected)
+				{
+					instance->setActivePlayers(StateManager::ActivePlayers::PLAYER_ONE_AND_TWO);
+					isPlayerTwoSelected = true;
+				}
+				else
+				{
+					instance->setActivePlayers(StateManager::ActivePlayers::PLAYER_ONE);
+					isPlayerTwoSelected = false;
+				}
 			}
 		}
 
 		if (state == StateManager::GameState::GAME_STARTED)
 		{
-			if (mKeyboard->WasKeyDown(DX::Keys::A))
+			if (instance->getActivePlayers() == StateManager::ActivePlayers::PLAYER_ONE)
 			{
-				mPlayerOne->SetPlayerXMovement(Sprite::SpriteTypeEnum::PLAYER_ONE, -2.0f);
+				if (mKeyboard->WasKeyDown(DX::Keys::A) || mGamePad->WasButtonDown(DX::GamePadButtons::DPadLeft))
+				{
+					mPlayerOne->SetPlayerXMovement(Sprite::SpriteTypeEnum::PLAYER_ONE, -2.0f);
+				}
+				if (mKeyboard->WasKeyDown(DX::Keys::D) || mGamePad->WasButtonDown(DX::GamePadButtons::DPadRight))
+				{
+					mPlayerOne->SetPlayerXMovement(Sprite::SpriteTypeEnum::PLAYER_ONE, 2.0f);
+				}
+				if (mKeyboard->WasKeyPressedThisFrame(DX::Keys::J) || mGamePad->WasButtonDown(DX::GamePadButtons::A))
+				{
+					mPlayerOne->SetPlayerYMovement(Sprite::SpriteTypeEnum::PLAYER_ONE, 2.0f);
+				}
+				// Currently you can't come back to main menu as game crashes whenever i dispose off components.
+
+				/*if (mKeyboard->WasKeyPressedThisFrame(DX::Keys::Back))
+				{
+					instance->setState(StateManager::GameState::MAIN_MENU);
+					previousGameState = StateManager::GameState::GAME_STARTED;
+					previousActivePlayers = StateManager::ActivePlayers::PLAYER_ONE;
+					removeComponents(previousGameState, previousActivePlayers);
+				}*/
 			}
-			if (mKeyboard->WasKeyDown(DX::Keys::D))
+
+			else
 			{
-				mPlayerOne->SetPlayerXMovement(Sprite::SpriteTypeEnum::PLAYER_ONE, 2.0f);
-			}
-			if (mKeyboard->WasKeyPressedThisFrame(DX::Keys::J))
-			{
-				mPlayerOne->SetPlayerYMovement(Sprite::SpriteTypeEnum::PLAYER_ONE, 2.0f);
+				if (mKeyboard->WasKeyDown(DX::Keys::A) || mGamePad->WasButtonDown(DX::GamePadButtons::DPadLeft))
+				{
+					mPlayerOne->SetPlayerXMovement(Sprite::SpriteTypeEnum::PLAYER_ONE, -2.0f);
+				}
+				if (mKeyboard->WasKeyDown(DX::Keys::D) || mGamePad->WasButtonDown(DX::GamePadButtons::DPadRight))
+				{
+					mPlayerOne->SetPlayerXMovement(Sprite::SpriteTypeEnum::PLAYER_ONE, 2.0f);
+				}
+				if (mKeyboard->WasKeyPressedThisFrame(DX::Keys::J) || mGamePad->WasButtonDown(DX::GamePadButtons::A))
+				{
+					mPlayerOne->SetPlayerYMovement(Sprite::SpriteTypeEnum::PLAYER_ONE, 2.0f);
+				}
+				if (mKeyboard->WasKeyDown(DX::Keys::Left))
+				{
+					mPlayerTwo->SetPlayerXMovement(Sprite::SpriteTypeEnum::PLAYER_TWO, -2.0f);
+				}
+				if (mKeyboard->WasKeyDown(DX::Keys::Right))
+				{
+					mPlayerTwo->SetPlayerXMovement(Sprite::SpriteTypeEnum::PLAYER_TWO, 2.0f);
+				}
+				if (mKeyboard->WasKeyPressedThisFrame(DX::Keys::PageDown))
+				{
+					mPlayerTwo->SetPlayerYMovement(Sprite::SpriteTypeEnum::PLAYER_TWO, 2.0f);
+				}
+
+				// Currently you can't come back to main menu as game crashes whenever i dispose off components.
+
+				/*if (mKeyboard->WasKeyPressedThisFrame(DX::Keys::Back))
+				{
+					instance->setState(StateManager::GameState::MAIN_MENU);
+					previousGameState = StateManager::GameState::GAME_STARTED;
+					previousActivePlayers = StateManager::ActivePlayers::PLAYER_ONE_AND_TWO;
+					removeComponents(previousGameState, previousActivePlayers);
+				}*/
 			}
 		}
 		PIXEndEvent();
@@ -345,10 +456,106 @@ namespace DirectXGame
 		instance->setActivePlayers(StateManager::ActivePlayers::PLAYER_ONE);
 
 		mPlayerOne = make_shared<SpriteDemoManager>(mDeviceResources, mCamera, Sprite::SpriteTypeEnum::PLAYER_ONE);
+		mPlayerTwo = make_shared<SpriteDemoManager>(mDeviceResources, mCamera, Sprite::SpriteTypeEnum::PLAYER_TWO);
 		mLevelScreen = make_shared<SpriteDemoManager>(mDeviceResources, mCamera, Sprite::SpriteTypeEnum::LEVEL_SCREEN);
 		mEnemyOne = make_shared<SpriteDemoManager>(mDeviceResources, mCamera, Sprite::SpriteTypeEnum::ENEMY_ONE);
 		mEnemyTwo = make_shared<SpriteDemoManager>(mDeviceResources, mCamera, Sprite::SpriteTypeEnum::ENEMY_TWO);
 		mEnemyThree = make_shared<SpriteDemoManager>(mDeviceResources, mCamera, Sprite::SpriteTypeEnum::ENEMY_THREE);
 	}
+
+	std::pair<bool, SpriteDemoManager*> Game::CheckCollision(SpriteDemoManager* objectOne, SpriteDemoManager* objectTwo)
+	{
+		auto objOneXPos = objectOne->GetXPosition();
+		auto objTwoXPos = objectTwo->GetXPosition();
+		auto objOneXSize = objectOne->GetXSize();
+		auto objTwoXSize = objectTwo->GetXSize();
+		auto objOneYPos = objectOne->GetYPosition();
+		auto objTwoYPos = objectTwo->GetYPosition();
+		auto objOneYSize = objectOne->GetYSize();
+		auto objTwoYSize = objectTwo->GetYSize();
+		// If X axis collides.
+		bool collisionX = objOneXPos + objOneXSize/2 >= objTwoXPos &&
+			objTwoXPos + objTwoXSize/2 >= objOneXPos;
+		// If Y axis collides.
+		bool collisionY = objOneYPos + objOneYSize/ 2 >= objTwoYPos &&
+			objTwoYPos + objTwoYSize/ 2 >= objOneYPos;
+		// Collision only if on both axes
+		if (collisionX && collisionY)
+		{
+			// Okay. It means some part collided. we are only interested in find out which part of body collided. 
+			// so we can determine who was on the top of who. 
+			
+			// YET TO IMPLEMENT 
+		}
+
+		// FOR CHECKING ONLY 
+		return std::make_pair(true, objectTwo);
+	}
+
+	void Game::removeComponents(StateManager::GameState state, StateManager::ActivePlayers activePlayers)
+	{
+		if (state == StateManager::GameState::GAME_STARTED)
+		{
+			if (activePlayers == StateManager::ActivePlayers::PLAYER_ONE)
+			{
+				auto it = std::find(mComponents.begin(), mComponents.end(), mLevelScreen);
+				mComponents.erase(it);
+				it = std::find(mComponents.begin(), mComponents.end(), mPlayerOne);
+				mComponents.erase(it);
+				it = std::find(mComponents.begin(), mComponents.end(), mEnemyOne);
+				mComponents.erase(it);
+				it = std::find(mComponents.begin(), mComponents.end(), mEnemyTwo);
+				mComponents.erase(it);
+				it = std::find(mComponents.begin(), mComponents.end(), mEnemyThree);
+				mComponents.erase(it);
+
+				mComponents.push_back(mMainMenuScreen);
+				mComponents.push_back(mMainMenuBalloons);
+			}
+			if (activePlayers == StateManager::ActivePlayers::PLAYER_ONE_AND_TWO)
+			{
+				auto it = std::find(mComponents.begin(), mComponents.end(), mLevelScreen);
+				mComponents.erase(it);
+				it = std::find(mComponents.begin(), mComponents.end(), mPlayerOne);
+				mComponents.erase(it);
+				it = std::find(mComponents.begin(), mComponents.end(), mPlayerTwo);
+				mComponents.erase(it);
+				it = std::find(mComponents.begin(), mComponents.end(), mEnemyOne);
+				mComponents.erase(it);
+				it = std::find(mComponents.begin(), mComponents.end(), mEnemyTwo);
+				mComponents.erase(it);
+				it = std::find(mComponents.begin(), mComponents.end(), mEnemyThree);
+				mComponents.erase(it);
+
+				mComponents.push_back(mMainMenuScreen);
+				mComponents.push_back(mMainMenuBalloons);
+			}
+		}
+	}
+
+	void Game::releaseResources(StateManager::GameState state, StateManager::ActivePlayers activePlayers)
+	{
+		if (state == StateManager::GameState::GAME_STARTED)
+		{
+			if (activePlayers == StateManager::ActivePlayers::PLAYER_ONE)
+			{
+				mLevelScreen->ReleaseDeviceDependentResources();
+				mPlayerOne->ReleaseDeviceDependentResources();
+				mEnemyOne->ReleaseDeviceDependentResources();
+				mEnemyTwo->ReleaseDeviceDependentResources();
+				mEnemyThree->ReleaseDeviceDependentResources();
+			}
+			if (activePlayers == StateManager::ActivePlayers::PLAYER_ONE_AND_TWO)
+			{
+				mLevelScreen->ReleaseDeviceDependentResources();
+				mPlayerOne->ReleaseDeviceDependentResources();
+				mPlayerTwo->ReleaseDeviceDependentResources();
+				mEnemyOne->ReleaseDeviceDependentResources();
+				mEnemyTwo->ReleaseDeviceDependentResources();
+				mEnemyThree->ReleaseDeviceDependentResources();
+			}
+		}
+	}
+
 #pragma endregion
 }

@@ -2,6 +2,8 @@
 
 #include "DeviceResources.h"
 #include "StepTimer.h"
+#include <tuple>
+#include "StateManager.h"
 
 namespace DX
 {
@@ -72,6 +74,13 @@ namespace DirectXGame
 		winrt::com_ptr<ID3D11DepthStencilState> m_DepthStencilState;
 		winrt::com_ptr<ID3D11RasterizerState> mRasterizerState;
 		D3D11_RASTERIZER_DESC desc = {};
+
+		bool isPlayerTwoSelected = false;
+		StateManager::GameState previousGameState = StateManager::GameState::MAIN_MENU;
+		StateManager::ActivePlayers previousActivePlayers = StateManager::ActivePlayers::PLAYER_ONE;
+		void removeComponents(StateManager::GameState state, StateManager::ActivePlayers activePlayers);
+		void releaseResources(StateManager::GameState state, StateManager::ActivePlayers activePlayers);
+		std::pair<bool, SpriteDemoManager*> CheckCollision(SpriteDemoManager* objectOne, SpriteDemoManager* objectTwo);
 
 	};
 }

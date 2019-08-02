@@ -30,6 +30,11 @@ namespace DirectXGame
 		virtual void Update(const DX::StepTimer& timer) override;
 		virtual void Render(const DX::StepTimer& timer) override;
 
+		float GetXPosition();
+		float GetYPosition();
+		float GetXSize();
+		float GetYSize();
+
 		DirectX::XMFLOAT2 SpriteScale{ DirectX::XMFLOAT2(2.0f, 4.0f) };
 		DirectX::XMFLOAT2 mPosition{ 0.0f, 0.0f };
 		DirectX::XMFLOAT2 UVScalingFactor{ DirectX::XMFLOAT2(1.0f / 4,1.0f) };
@@ -60,7 +65,6 @@ namespace DirectXGame
 
 		inline static const std::uint32_t SpriteCount{ 8 }; // Sprites are arranged horizontally within the sprite sheet
 		inline static const std::uint32_t MoodCount{ 4 }; // Moods are arranged vertically within the sprite sheet
-		//inline static const DirectX::XMFLOAT2 UVScalingFactor{ DirectX::XMFLOAT2(/*1.0f / SpriteCount, 1.0f / MoodCount*//*0.25,2*/1.0f/4,1.0f) };
 		inline static const double MoodUpdateDelay{ 0.5 }; // Delay between mood changes, in seconds
 
 		winrt::com_ptr<ID3D11VertexShader> mVertexShader;
@@ -95,6 +99,8 @@ namespace DirectXGame
 			DirectX::XMFLOAT2 SpriteScale;
 			DirectX::XMFLOAT2 UVScalingFactor;
 			std::wstring SpriteSheetName;
+			float SpriteXSize;
+			float SPriteYSize;
 		};
 
 		enum class SpriteInitialPositions
@@ -149,6 +155,8 @@ namespace DirectXGame
 		float mJumpAmount = 0;
 
 		DirectX::XMFLOAT2 mPlayerMovement = {0.0f, 0.0f};
+		float mXSize = 0.0f;
+		float mYSize = 0.0f;
 		
 		void DrawSprite(Sprite& sprite);
 		void InitializeSprites(Sprite::SpriteTypeEnum type, std::vector<std::shared_ptr<Sprite>>& mSprites);
